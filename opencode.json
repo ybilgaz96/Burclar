@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "plan",
+  "model": "opencode-go/minimax-m2.7",
+  "small_model": "opencode-go/deepseek-v4-flash",
+  "agent": {
+    "plan": {
+      "mode": "primary",
+      "model": "opencode-go/deepseek-v4-pro",
+      "temperature": 0.2,
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "cat *": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git ls-files*": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "explore": "allow",
+          "scout": "allow"
+        }
+      }
+    },
+    "build": {
+      "mode": "primary",
+      "model": "opencode-go/minimax-m2.7",
+      "temperature": 0.2,
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "cat *": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git ls-files*": "allow"
+        },
+        "task": {
+          "*": "ask",
+          "explore": "allow",
+          "scout": "allow"
+        }
+      }
+    },
+    "explore": {
+      "mode": "subagent",
+      "model": "opencode-go/qwen3.5-plus",
+      "temperature": 0.1,
+      "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    },
+    "scout": {
+      "mode": "subagent",
+      "model": "opencode-go/deepseek-v4-flash",
+      "temperature": 0.1,
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "git clone*": "ask",
+          "git ls-remote*": "allow"
+        },
+        "webfetch": "allow",
+        "websearch": "allow",
+        "external_directory": "ask"
+      }
+    },
+    "summary": {
+      "model": "opencode-go/deepseek-v4-flash",
+      "temperature": 0.1
+    }
+  }
+}

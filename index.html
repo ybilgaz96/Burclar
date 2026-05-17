@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KozmikRehber - AI Powered Horoscope</title>
+  <meta name="description" content="Günlük, haftalık ve aylık burç yorumları. AI destekli astroloji platformu.">
+  <meta name="keywords" content="burç, yorum, günlük burç, haftalık burç, aylık burç, astroloji">
+  <meta property="og:title" content="KozmikRehber - AI Powered Horoscope">
+  <meta property="og:description" content="Günlük, haftalık ve aylık burç yorumları. AI destekli astroloji platformu.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@type": "WebApplication",
+    "name": "KozmikRehber",
+    "description": "AI-powered astrology platform with daily, weekly and monthly horoscope readings"
+  }
+  </script>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  
+  <div class="main-content">
+    <header>
+      <div class="header-inner">
+        <a href="#" class="logo" onclick="showView('horoscope'); return false;">
+          <span class="logo-symbol">🌙</span>
+          <span class="logo-text" data-i18n="siteName">KozmikRehber</span>
+        </a>
+        
+        <nav>
+          <a href="#" class="nav-link" data-period="daily" onclick="setPeriod('daily'); showView('horoscope'); return false;">Günlük</a>
+          <a href="#" class="nav-link" data-period="weekly" onclick="setPeriod('weekly'); showView('weekly'); return false;">Haftalık</a>
+          <a href="#" class="nav-link" data-period="monthly" onclick="setPeriod('monthly'); showView('monthly'); return false;">Aylık</a>
+          <a href="#" class="nav-link" onclick="showTools(); return false;">Araçlar</a>
+          <a href="#" class="nav-link" onclick="showPremium(); return false;">Premium</a>
+          <button class="lang-toggle" id="lang-toggle">EN</button>
+        </nav>
+        
+        <div class="moon-phase-header" id="moon-phase">
+          <span>🌕</span>
+          <span>Dolunay</span>
+        </div>
+      </div>
+    </header>
+    
+    <section class="hero" id="hero-section">
+      <h1 data-i18n="tagline">Yıldızlar Sana Ne Söylüyor?</h1>
+      <p class="hero-subtitle" data-i18n="hero.subtitle">AI destekli burç yorumları</p>
+      
+      <div class="zodiac-selector" id="zodiac-grid"></div>
+      
+      <button class="btn" id="get-reading-btn" data-i18n="hero.getReading">Yorumunu Al</button>
+    </section>
+    
+    <section class="reading-section" id="reading-section">
+      <div class="container">
+        <div class="tabs">
+          <button class="tab active" data-period="daily" onclick="setPeriod('daily')" data-i18n="nav.daily">Günlük</button>
+          <button class="tab" data-period="weekly" onclick="setPeriod('weekly')" data-i18n="nav.weekly">Haftalık</button>
+          <button class="tab" data-period="monthly" onclick="setPeriod('monthly')" data-i18n="nav.monthly">Aylık</button>
+        </div>
+        
+        <div id="reading-content"></div>
+      </div>
+    </section>
+    
+    <section class="tools-section hidden" id="tools-section">
+      <div class="container">
+        <h2 class="section-title">İnteraktif Araçlar</h2>
+        <p class="section-subtitle">Astrololoji araçlarımızı keşfet</p>
+        
+        <div class="tools-grid">
+          <div class="tool-card" data-tool="birth-chart">
+            <div class="tool-icon">🗺️</div>
+            <h3 class="tool-title" data-i18n="tools.birthChart">Doğum Haritası</h3>
+            <p class="tool-desc">Güneş, Ay ve Yükselen burcunuzu öğrenin</p>
+          </div>
+          
+          <div class="tool-card" data-tool="compatibility">
+            <div class="tool-icon">💕</div>
+            <h3 class="tool-title" data-i18n="tools.compatibility">Burç Uyumluluğu</h3>
+            <p class="tool-desc">İki burç arasındaki uyumu keşfedin</p>
+          </div>
+          
+          <div class="tool-card" data-tool="tarot">
+            <div class="tool-icon">🃏</div>
+            <h3 class="tool-title" data-i18n="tools.tarot">Günlük Tarot</h3>
+            <p class="tool-desc">Gününüz için bir tarot kartı çekin</p>
+          </div>
+          
+          <div class="tool-card" data-tool="moon">
+            <div class="tool-icon">🌙</div>
+            <h3 class="tool-title" data-i18n="tools.moonCalendar">Ay Takvimi</h3>
+            <p class="tool-desc">Bugünün ay fazı ve ritüelleri</p>
+          </div>
+          
+          <div class="tool-card" data-tool="oracle">
+            <div class="tool-icon">🔮</div>
+            <h3 class="tool-title" data-i18n="tools.oracle">Soru Sor</h3>
+            <p class="tool-desc">Astrologa özel sorunuzu sorun</p>
+          </div>
+          
+          <div class="tool-card" data-tool="numerology">
+            <div class="tool-icon">🔢</div>
+            <h3 class="tool-title">Numeroloji</h3>
+            <p class="tool-desc">Kader sayınızı keşfedin</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="premium-section hidden" id="premium-section">
+      <div class="container">
+        <h2 class="section-title" data-i18n="premium.title">Premium'a Geç</h2>
+        <p class="section-subtitle" data-i18n="premium.subtitle">Sınırsız yorum ve özel içerikler</p>
+        
+        <div class="premium-cards">
+          <div class="premium-card">
+            <h3 class="premium-title" data-i18n="premium.monthly">Aylık</h3>
+            <div class="premium-price">₺99 <span>/ay</span></div>
+            <ul class="premium-features">
+              <li>Sınırsız günlük/haftalık/aylık yorumlar</li>
+              <li>Sınırsız Oracle sorusu</li>
+              <li>Reklamsız deneyim</li>
+            </ul>
+            <button class="btn btn-secondary">Seç</button>
+          </div>
+          
+          <div class="premium-card featured">
+            <div class="premium-badge">En Popüler</div>
+            <h3 class="premium-title" data-i18n="premium.yearly">Yıllık</h3>
+            <div class="premium-price">₺799 <span>/yıl</span></div>
+            <ul class="premium-features">
+              <li>Tüm aylık özellikler</li>
+              <li>2 ay bedava</li>
+              <li>Öncelikli içerik erişimi</li>
+            </ul>
+            <button class="btn">Seç</button>
+          </div>
+          
+          <div class="premium-card">
+            <h3 class="premium-title" data-i18n="premium.lifetime">Ömür Boyu</h3>
+            <div class="premium-price">₺1999</div>
+            <ul class="premium-features">
+              <li>Tüm özellikler</li>
+              <li>Sınırsız erişim</li>
+              <li>Özel burç PDF'leri</li>
+            </ul>
+            <button class="btn btn-secondary">Seç</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <footer>
+      <div class="container">
+        <div class="footer-logo" data-i18n="siteName">KozmikRehber</div>
+        <p class="footer-tagline" data-i18n="footer.tagline">Bu site Claude AI destekliyle güçlendirilmiştir.</p>
+        <div class="footer-links">
+          <a href="#" data-i18n="footer.privacy">Gizlilik Politikası</a>
+          <a href="#" data-i18n="footer.terms">Kullanım Şartları</a>
+        </div>
+        <p class="footer-copyright">© 2025 KozmikRehber. Tüm hakları saklıdır.</p>
+      </div>
+    </footer>
+  </div>
+  
+  <div class="mobile-nav">
+    <a href="#" onclick="showView('horoscope'); return false;" class="active">
+      <span>🏠</span>
+      <span>Ana</span>
+    </a>
+    <a href="#" onclick="selectSign(localStorage.getItem('userSign')); if(selectedSign) renderReading(); return false;">
+      <span>♈</span>
+      <span>Burcum</span>
+    </a>
+    <a href="#" onclick="showTools(); return false;">
+      <span>🌙</span>
+      <span>Ay</span>
+    </a>
+    <a href="#" onclick="openModal('oracle-modal'); return false;">
+      <span>🔮</span>
+      <span>Oracle</span>
+    </a>
+    <a href="#" onclick="showPremium(); return false;">
+      <span>⭐</span>
+      <span>Premium</span>
+    </a>
+  </div>
+  
+  <div class="modal" id="oracle-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title" data-i18n="tools.oracle">Soru Sor</h3>
+      <div class="oracles-remaining" id="oracles-remaining">Kalan soru: 3</div>
+      <div class="form-group">
+        <textarea id="oracle-input" data-i18n-placeholder="oracle.placeholder" placeholder="Astrologa bir soru sor..."></textarea>
+      </div>
+      <button class="btn" onclick="handleOracleSubmit()" style="width: 100%;" data-i18n="oracle.send">Gönder</button>
+      <div id="oracle-response"></div>
+    </div>
+  </div>
+  
+  <div class="modal" id="compatibility-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title" data-i18n="tools.compatibility">Burç Uyumluluğu</h3>
+      <div class="compatibility-selectors">
+        <select id="compat-sign1" class="form-group">
+          <option value="">Burç 1</option>
+        </select>
+        <select id="compat-sign2" class="form-group">
+          <option value="">Burç 2</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary" onclick="handleCompatibility()" style="width: 100%;">Uyumu Hesapla</button>
+      <div id="compatibility-result"></div>
+    </div>
+  </div>
+  
+  <div class="modal" id="birth-chart-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title" data-i18n="tools.birthChart">Doğum Haritası</h3>
+      <div class="form-group">
+        <label>İsim</label>
+        <input type="text" id="birth-name" placeholder="Adın">
+      </div>
+      <div class="form-group">
+        <label>Doğum Tarihi</label>
+        <input type="date" id="birth-date">
+      </div>
+      <button class="btn" onclick="handleBirthChart()" style="width: 100%;">Hesapla</button>
+      <div id="birth-chart-result"></div>
+    </div>
+  </div>
+  
+  <div class="modal" id="tarot-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title" data-i18n="tools.tarot">Günlük Tarot</h3>
+      <div id="tarot-result"></div>
+    </div>
+  </div>
+  
+  <div class="modal" id="moon-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title" data-i18n="tools.moonCalendar">Ay Takvimi</h3>
+      <div id="moon-result"></div>
+    </div>
+  </div>
+  
+  <div class="modal" id="numerology-modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title">Numeroloji</h3>
+      <div class="form-group">
+        <label>İsim</label>
+        <input type="text" id="numerology-name" placeholder="Adın">
+      </div>
+      <div class="form-group">
+        <label>Doğum Tarihi</label>
+        <input type="date" id="numerology-date">
+      </div>
+      <button class="btn" onclick="handleNumerology()" style="width: 100%;">Hesapla</button>
+      <div id="numerology-result"></div>
+    </div>
+  </div>
+  
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner">✨</div>
+    <p class="loading-text" data-i18n="loading">Yıldızlar okunuyor...</p>
+  </div>
+  
+  <script src="i18n.js"></script>
+  <script src="horoscope.js"></script>
+  <script src="tools.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
