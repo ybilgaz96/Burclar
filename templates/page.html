@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <meta property="og:title" content="{{OG_TITLE}}">
+  <meta property="og:description" content="{{OG_DESCRIPTION}}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:site_name" content="KozmikRehber">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{OG_TITLE}}">
+  <meta name="twitter:description" content="{{OG_DESCRIPTION}}">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{SCHEMA_HEADLINE}}",
+    "description": "{{SCHEMA_DESCRIPTION}}",
+    "datePublished": "{{DATE_PUBLISHED}}",
+    "author": {
+      "@type": "Organization",
+      "name": "KozmikRehber"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "KozmikRehber",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{SITE_URL}}/logo.png"
+      }
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  
+  <div class="main-content">
+    <header>
+      <div class="header-inner">
+        <a href="/" class="logo">
+          <span class="logo-symbol">🌙</span>
+          <span class="logo-text">KozmikRehber</span>
+        </a>
+        <nav>
+          <a href="/index.html" class="nav-link">Ana Sayfa</a>
+          <a href="{{DAILY_URL}}" class="nav-link {{DAILY_ACTIVE}}">Günlük</a>
+          <a href="{{WEEKLY_URL}}" class="nav-link {{WEEKLY_ACTIVE}}">Haftalık</a>
+          <a href="{{MONTHLY_URL}}" class="nav-link {{MONTHLY_ACTIVE}}">Aylık</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="horoscope-page">
+      <nav class="breadcrumb">
+        <a href="/">Ana Sayfa</a> › <a href="/{{SIGN_PAGE_URL}}">{{SIGN_NAME}}</a> › {{PERIOD_LABEL}}
+      </nav>
+
+      <div class="horoscope-header">
+        <span class="horoscope-symbol">{{SIGN_SYMBOL}}</span>
+        <div class="horoscope-title">
+          <h1>{{SIGN_NAME}} Burcu {{PERIOD_TITLE}}</h1>
+          <p class="horoscope-date">{{DATE_DISPLAY}}</p>
+        </div>
+      </div>
+
+      <article class="horoscope-content">
+        <div class="content-text">{{CONTENT}}</div>
+        
+        <div class="lucky-info">
+          <div class="lucky-item">
+            <div class="lucky-label">Şanslı Sayı</div>
+            <div class="lucky-value">{{LUCKY_NUMBER}}</div>
+          </div>
+          <div class="lucky-item">
+            <div class="lucky-label">Şanslı Renk</div>
+            <div class="lucky-value">{{LUCKY_COLOR}}</div>
+          </div>
+          <div class="lucky-item">
+            <div class="lucky-label">Şanslı Gün</div>
+            <div class="lucky-value">{{LUCKY_DAY}}</div>
+          </div>
+        </div>
+      </article>
+
+      <div class="ad-space">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
+
+      <section class="other-signs">
+        <h2>Diğer Burçlar</h2>
+        <div class="signs-grid">
+          {{OTHER_SIGNS}}
+        </div>
+      </section>
+
+      <section class="newsletter">
+        <h2>Haftalık Burç Yorumu E-postana Gelsin</h2>
+        <p>Her Pazartesi güncel burç yorumları için kaydol.</p>
+        <form class="newsletter-form" action="#" method="post">
+          <input type="email" name="email" placeholder="E-posta adresin" required>
+          <select name="sign">
+            <option value="">Burcunu seç</option>
+            {{SIGN_OPTIONS}}
+          </select>
+          <button type="submit">Kaydol</button>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-logo">🌙 KozmikRehber</div>
+        <p>AI destekli burç yorumları platformu</p>
+        <div class="footer-links">
+          <a href="/index.html">Ana Sayfa</a>
+          <a href="/pages/gizlilik.html">Gizlilik</a>
+          <a href="/pages/iletisim.html">İletişim</a>
+        </div>
+        <p class="copyright">© 2026 KozmikRehber. Tüm hakları saklıdır.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script src="/tools.js"></script>
+  <script src="/app-init.js"></script>
+</body>
+</html>

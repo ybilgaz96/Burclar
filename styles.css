@@ -1056,3 +1056,363 @@ footer {
     transform: none;
   }
 }
+
+.landing-page {
+  padding: 120px 20px 60px;
+}
+
+.landing-page .hero {
+  text-align: center;
+  padding: 40px 20px 60px;
+}
+
+.landing-page .hero h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(28px, 5vw, 48px);
+  color: var(--accent-gold);
+  text-shadow: var(--glow-gold);
+  margin-bottom: 12px;
+}
+
+.landing-page .hero-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.signs-section {
+  padding: 60px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.signs-section h2 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 28px;
+  color: var(--accent-gold);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  font-style: italic;
+}
+
+.signs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sign-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.sign-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-gold);
+  box-shadow: var(--glow-gold);
+}
+
+.sign-card .sign-symbol {
+  font-size: 36px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
+}
+
+.sign-card .sign-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.sign-card .sign-period {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ad-section {
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, transparent, rgba(123, 45, 139, 0.05), transparent);
+}
+
+.newsletter-landing {
+  padding: 60px 20px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.newsletter-landing h2 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 24px;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+.newsletter-landing p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.newsletter-form input[type="email"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px 18px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+}
+
+.newsletter-form select {
+  padding: 14px 18px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  min-width: 150px;
+}
+
+.newsletter-form button {
+  background: linear-gradient(135deg, var(--accent-gold), #b8962e);
+  color: var(--bg-primary);
+  border: none;
+  padding: 14px 28px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.newsletter-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+.horoscope-page {
+  padding: 120px 20px 60px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--accent-gold);
+}
+
+.horoscope-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.horoscope-symbol {
+  font-size: 72px;
+  filter: drop-shadow(var(--glow-gold));
+}
+
+.horoscope-title h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 32px;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+}
+
+.horoscope-date {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.horoscope-content {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.content-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  line-height: 1.9;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+}
+
+.content-text p {
+  margin-bottom: 16px;
+}
+
+.content-text p:last-child {
+  margin-bottom: 0;
+}
+
+.horoscope-page .lucky-info {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px;
+  background: rgba(212, 175, 55, 0.05);
+  border-radius: 12px;
+  margin-top: 24px;
+}
+
+.other-signs {
+  padding: 60px 0;
+}
+
+.other-signs h2 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 24px;
+  color: var(--accent-gold);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.other-signs .signs-grid {
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.sign-page {
+  padding: 120px 20px 60px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sign-hero {
+  margin-bottom: 40px;
+}
+
+.sign-symbol-large {
+  font-size: 100px;
+  filter: drop-shadow(var(--glow-gold));
+  display: block;
+  margin-bottom: 16px;
+}
+
+.sign-hero h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 40px;
+  color: var(--accent-gold);
+}
+
+.sign-links {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 60px;
+}
+
+.period-btn {
+  display: inline-block;
+  padding: 16px 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--accent-gold);
+  border-radius: 30px;
+  color: var(--accent-gold);
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-gold);
+}
+
+.other-signs-mini h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.signs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.sign-mini {
+  padding: 8px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.sign-mini:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.ad-space {
+  margin: 40px 0;
+  text-align: center;
+  min-height: 100px;
+  background: rgba(123, 45, 139, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-space ins {
+  min-height: 90px;
+}
