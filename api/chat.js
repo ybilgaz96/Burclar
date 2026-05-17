@@ -49,14 +49,10 @@ async function callOpenCodeGoAPI(prompt, model, type) {
   
   const cached = getFromMemoryCache(cacheKey);
   if (cached) {
-    console.log("Returning cached response");
     return cached;
   }
   
   const fullPrompt = type === "oracle" ? prompt : `${SYSTEM_PROMPT}\n\n${prompt}`;
-  
-  console.log("Calling OpenCode Go API with model:", config.modelId);
-  console.log("Prompt length:", fullPrompt.length);
   
   const requestBody = {
     model: config.modelId,
@@ -76,17 +72,12 @@ async function callOpenCodeGoAPI(prompt, model, type) {
     body: JSON.stringify(requestBody)
   });
   
-  console.log("OpenCode response status:", response.status);
-  
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("API Error Response:", errorText);
-    throw new Error(`API call failed: ${response.status} - ${errorText}`);
+    throw new Error(`API call failed: ${response.status}`);
   }
   
   const data = await response.json();
-  console.log("API Response keys:", Object.keys(data));
-  console.log("API Response data:", JSON.stringify(data).slice(0, 500));
   
   let content;
   if (data.choices && data.choices[0] && data.choices[0].message) {
@@ -94,17 +85,10 @@ async function callOpenCodeGoAPI(prompt, model, type) {
   } else if (data.content) {
     content = data.content;
   } else {
-    console.error("Unexpected response format:", data);
-    throw new Error(`Unexpected response format: ${JSON.stringify(data).slice(0, 200)}`);
-  }
-  
-  if (!content) {
-    console.error("Content is empty or undefined");
-    throw new Error("API returned empty content");
+    throw new Error("Unexpected response format");
   }
   
   saveToMemoryCache(cacheKey, content);
-  
   return content;
 }
 
@@ -125,11 +109,9 @@ module.exports = async function handler(req, res) {
   
   try {
     const content = await callOpenCodeGoAPI(prompt, model, type);
-    
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
     return res.status(200).json({ content });
   } catch (error) {
-    console.error("Handler error:", error);
-    return res.status(500).json({ error: "Failed to get response" });
+    return res.status(500).json({ error: error.message });
   }
 };

@@ -183,11 +183,7 @@ async function askOracle(question, sign) {
 }
 
 function parseHoroscopeContent(content, lang) {
-  console.log("AI Response content length:", content?.length);
-  console.log("AI Response preview:", content?.slice(0, 200));
-  
   if (!content || content.trim().length === 0) {
-    console.error("Empty content received from API");
     return {
       fullContent: "İçerik yüklenemedi. Lütfen tekrar deneyin.",
       lucky: getLuckyInfo("")
@@ -195,7 +191,6 @@ function parseHoroscopeContent(content, lang) {
   }
   
   const lucky = getLuckyInfo(content);
-  console.log("Extracted lucky info:", lucky);
   
   return {
     fullContent: content,
