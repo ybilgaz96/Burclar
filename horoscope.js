@@ -9,7 +9,7 @@ const CACHE_DURATION = {
 const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe veya İngilizce yaz (kullanıcının diline göre). Mistik, sıcak, umut verici ama gerçekçi bir dil kullan. Asla kesin tahminler yapma, rehberlik sun. Her yorumda pratik bir tavsiye ekle. Yanıtları format: önce enerji özeti, sonra kategoriler, son tavsiye. Emojileri ölçülü kullan (paragraf başına 1).`;
 
 async function callAI(prompt, type = "horoscope") {
-  const model = type === "oracle" ? "deepseek-v4-flash" : "deepseek-v4-pro";
+  const model = "deepseek-v4-flash";
   
   const response = await fetch("/api/chat", {
     method: "POST",
