@@ -9,7 +9,7 @@ const CACHE_DURATION = {
 const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe veya İngilizce yaz (kullanıcının diline göre). Mistik, sıcak, umut verici ama gerçekçi bir dil kullan. Asla kesin tahminler yapma, rehberlik sun. Her yorumda pratik bir tavsiye ekle. Yanıtları format: önce enerji özeti, sonra kategoriler, son tavsiye. Emojileri ölçülü kullan (paragraf başına 1).`;
 
 async function callAI(prompt, type = "horoscope") {
-  const model = "deepseek-v4-flash";
+  const model = "qwen3.5-plus";
   
   const response = await fetch("/api/chat", {
     method: "POST",
@@ -17,12 +17,11 @@ async function callAI(prompt, type = "horoscope") {
     body: JSON.stringify({ prompt, model, type })
   });
   
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API call failed: ${response.status} - ${errorText}`);
-  }
-  
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.error || `API call failed: ${response.status}`);
+  }
   
   if (!data.content) {
     throw new Error("No content in API response");
@@ -186,7 +185,7 @@ function parseHoroscopeContent(content, lang) {
   if (!content || content.trim().length === 0) {
     return {
       fullContent: "İçerik yüklenemedi. Lütfen tekrar deneyin.",
-      lucky: getLuckyInfo("")
+      lucky: { number: 7, color: "Mor", day: "Cuma" }
     };
   }
   
