@@ -177,51 +177,15 @@ async function askOracle(question, sign) {
 }
 
 function parseHoroscopeContent(content, lang) {
-  const sections = content.split(/\[(ENERJİ ÖZETİ|ENERGY SUMMARY|CATEGORIES|KATEGORİLER|ŞANSLI SAYI|LUCKY NUMBER|ŞANSLI RENK|LUCKY COLOR|ŞANSLI GÜN|LUCKY DAY|TAVSİYE|ADVICE)\]/i);
+  console.log("AI Response:", content);
   
-  let energy = "", categories = "", luckyInfo = "", advice = "";
-  let currentSection = "";
+  const luckyInfo = content;
+  const lucky = getLuckyInfo(luckyInfo);
   
-  const cleaned = content.replace(/\[(ENERG[YIİ]\s*OZETİ|ENERGY\s*SUMMARY|CATEGORIES|KATEGORİLER|ŞANSLI\s*SAYI|LUCKY\s*NUMBER|ŞANSLI\s*RENG|LUCKY\s*COLOR|ŞANSLI\s*GÜN|LUCKY\s*DAY|TAVSİYE|ADVICE)\]/gi, match => {
-    const normalized = match.toUpperCase().replace(/İ/g, "I").replace(/[^\w\s]/g, "");
-    if (normalized.includes("ENERG") || normalized.includes("OZET")) return "[ENERGY]";
-    if (normalized.includes("CATEGOR")) return "[CATEGORIES]";
-    if (normalized.includes("SAYI") || normalized.includes("NUMBER")) return "[LUCKY]";
-    if (normalized.includes("RENG") || normalized.includes("COLOR")) return "[COLOR]";
-    if (normalized.includes("GÜN") || normalized.includes("DAY")) return "[DAY]";
-    if (normalized.includes("TAVSI") || normalized.includes("ADVICE")) return "[ADVICE]";
-    return match;
-  });
-  
-  const parts = cleaned.split("[").filter(Boolean);
-  
-  for (const part of parts) {
-    const trimmed = part.trim();
-    if (trimmed.startsWith("ENERGY")) {
-      energy = trimmed.replace(/^ENERGY.*?\n/, "").trim();
-    } else if (trimmed.startsWith("CATEGORIES")) {
-      categories = trimmed.replace(/^CATEGORIES.*?\n/, "").trim();
-    } else if (trimmed.startsWith("LUCKY")) {
-      const luckyMatch = trimmed.match(/(?:SAY[NİI]|NUMBER):?\s*(\d+)/i) ||
-                        trimmed.match(/(?:RENK|COLOR):?\s*(\w+)/i) ||
-                        trimmed.match(/(?:GÜN|DAY):?\s*(\w+)/i);
-      if (luckyMatch) {
-        luckyInfo = trimmed;
-      }
-    } else if (trimmed.startsWith("ADVICE")) {
-      advice = trimmed.replace(/^ADVICE.*?\n/, "").trim();
-    }
-  }
-  
-  if (!energy && !categories) {
-    const paragraphs = content.split(/\n\n+/);
-    energy = paragraphs[0] || "";
-    categories = paragraphs.slice(1, -2).join("\n\n") || "";
-    luckyInfo = paragraphs.slice(-2, -1)[0] || "";
-    advice = paragraphs.slice(-1)[0] || "";
-  }
-  
-  return { energy, categories, luckyInfo, advice };
+  return {
+    fullContent: content,
+    lucky: lucky
+  };
 }
 
 function getLuckyInfo(luckyInfo) {

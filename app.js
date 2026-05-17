@@ -161,12 +161,12 @@ async function renderReading() {
   
   try {
     const contentText = await getHoroscope(selectedSign, currentPeriod);
-    const { energy, categories, luckyInfo, advice } = parseHoroscopeContent(contentText, getCurrentLanguage());
-    const lucky = getLuckyInfo(luckyInfo);
+    const { fullContent, lucky } = parseHoroscopeContent(contentText, getCurrentLanguage());
     const signData = ZODIAC_SIGNS.find(s => s.id === selectedSign);
     const lang = getCurrentLanguage();
     
     const today = getTodayDate(lang);
+    const formattedContent = fullContent.replace(/\n\n/g, '<br><br>');
     
     content.innerHTML = `
       <div class="reading-card">
@@ -178,20 +178,8 @@ async function renderReading() {
           </div>
         </div>
         
-        ${energy ? `<div class="energy-summary">${energy}</div>` : ""}
-        
-        <div class="categories">
-          ${categories.split("\n\n").map((cat, i) => {
-            const icons = ["❤️", "💼", "🌿", "⭐"];
-            const names = [t("categories.love"), t("categories.career"), t("categories.health"), t("categories.general")];
-            return `
-              <div class="category">
-                <div class="category-icon">${icons[i] || "⭐"}</div>
-                <div class="category-name">${names[i] || t("categories.general")}</div>
-                <div class="category-content">${cat.trim()}</div>
-              </div>
-            `;
-          }).join("")}
+        <div class="full-reading">
+          ${formattedContent}
         </div>
         
         <div class="lucky-info">
@@ -208,13 +196,6 @@ async function renderReading() {
             <div class="lucky-value">${lucky.day}</div>
           </div>
         </div>
-        
-        ${advice ? `
-          <div class="advice">
-            <div class="advice-title">${lang === "tr" ? "Günün Tavsiyesi" : "Daily Advice"}</div>
-            <div class="advice-content">${advice}</div>
-          </div>
-        ` : ""}
         
         <div class="share-buttons">
           <button class="share-btn" onclick="copyReading('${selectedSign}', \`${contentText.replace(/`/g, "\\`")}\`)">

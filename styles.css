@@ -348,6 +348,26 @@ nav {
   border-left: 3px solid var(--accent-purple);
 }
 
+.full-reading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  line-height: 1.9;
+  color: var(--text-primary);
+  margin-bottom: 30px;
+  padding: 24px;
+  background: rgba(123, 45, 139, 0.08);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent-purple);
+}
+
+.full-reading p {
+  margin-bottom: 16px;
+}
+
+.full-reading p:last-child {
+  margin-bottom: 0;
+}
+
 .categories {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
