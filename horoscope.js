@@ -18,10 +18,16 @@ async function callAI(prompt, type = "horoscope") {
   });
   
   if (!response.ok) {
-    throw new Error("API call failed");
+    const errorText = await response.text();
+    throw new Error(`API call failed: ${response.status} - ${errorText}`);
   }
   
   const data = await response.json();
+  
+  if (!data.content) {
+    throw new Error("No content in API response");
+  }
+  
   return data.content;
 }
 
@@ -177,10 +183,19 @@ async function askOracle(question, sign) {
 }
 
 function parseHoroscopeContent(content, lang) {
-  console.log("AI Response:", content);
+  console.log("AI Response content length:", content?.length);
+  console.log("AI Response preview:", content?.slice(0, 200));
   
-  const luckyInfo = content;
-  const lucky = getLuckyInfo(luckyInfo);
+  if (!content || content.trim().length === 0) {
+    console.error("Empty content received from API");
+    return {
+      fullContent: "İçerik yüklenemedi. Lütfen tekrar deneyin.",
+      lucky: getLuckyInfo("")
+    };
+  }
+  
+  const lucky = getLuckyInfo(content);
+  console.log("Extracted lucky info:", lucky);
   
   return {
     fullContent: content,

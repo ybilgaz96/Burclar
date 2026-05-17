@@ -161,12 +161,19 @@ async function renderReading() {
   
   try {
     const contentText = await getHoroscope(selectedSign, currentPeriod);
+    console.log("Raw content:", contentText);
+    
+    if (!contentText || contentText.trim().length < 10) {
+      throw new Error("API returned empty or very short content");
+    }
+    
     const { fullContent, lucky } = parseHoroscopeContent(contentText, getCurrentLanguage());
+    console.log("Parsed content length:", fullContent?.length, "Lucky:", lucky);
     const signData = ZODIAC_SIGNS.find(s => s.id === selectedSign);
     const lang = getCurrentLanguage();
     
     const today = getTodayDate(lang);
-    const formattedContent = fullContent.replace(/\n\n/g, '<br><br>');
+    const formattedContent = fullContent.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
     
     content.innerHTML = `
       <div class="reading-card">
@@ -212,7 +219,7 @@ async function renderReading() {
     `;
   } catch (error) {
     console.error("Reading error:", error);
-    content.innerHTML = createErrorHTML(t("error"), () => renderReading());
+    content.innerHTML = createErrorHTML(error.message || t("error"), () => renderReading());
   }
 }
 

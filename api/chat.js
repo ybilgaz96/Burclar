@@ -49,10 +49,14 @@ async function callOpenCodeGoAPI(prompt, model, type) {
   
   const cached = getFromMemoryCache(cacheKey);
   if (cached) {
+    console.log("Returning cached response");
     return cached;
   }
   
   const fullPrompt = type === "oracle" ? prompt : `${SYSTEM_PROMPT}\n\n${prompt}`;
+  
+  console.log("Calling OpenCode Go API with model:", config.modelId);
+  console.log("Prompt length:", fullPrompt.length);
   
   const requestBody = {
     model: config.modelId,
@@ -72,13 +76,17 @@ async function callOpenCodeGoAPI(prompt, model, type) {
     body: JSON.stringify(requestBody)
   });
   
+  console.log("OpenCode response status:", response.status);
+  
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("API Error:", response.status, errorText);
-    throw new Error(`API call failed: ${response.status}`);
+    console.error("API Error Response:", errorText);
+    throw new Error(`API call failed: ${response.status} - ${errorText}`);
   }
   
   const data = await response.json();
+  console.log("API Response keys:", Object.keys(data));
+  console.log("API Response data:", JSON.stringify(data).slice(0, 500));
   
   let content;
   if (data.choices && data.choices[0] && data.choices[0].message) {
@@ -87,7 +95,12 @@ async function callOpenCodeGoAPI(prompt, model, type) {
     content = data.content;
   } else {
     console.error("Unexpected response format:", data);
-    throw new Error("Unexpected response format");
+    throw new Error(`Unexpected response format: ${JSON.stringify(data).slice(0, 200)}`);
+  }
+  
+  if (!content) {
+    console.error("Content is empty or undefined");
+    throw new Error("API returned empty content");
   }
   
   saveToMemoryCache(cacheKey, content);
