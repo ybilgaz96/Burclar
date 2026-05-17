@@ -79,13 +79,18 @@ async function callOpenCodeGoAPI(prompt, model, type) {
   
   const data = await response.json();
   
+  console.log("OpenCode response:", JSON.stringify(data).slice(0, 1000));
+  
   let content;
   if (data.choices && data.choices[0] && data.choices[0].message) {
     content = data.choices[0].message.content;
   } else if (data.content) {
     content = data.content;
+  } else if (typeof data === 'string') {
+    content = data;
   } else {
-    throw new Error("Unexpected response format");
+    console.log("Response structure:", Object.keys(data));
+    throw new Error("Unexpected response format: " + JSON.stringify(data).slice(0, 200));
   }
   
   saveToMemoryCache(cacheKey, content);
@@ -109,9 +114,11 @@ module.exports = async function handler(req, res) {
   
   try {
     const content = await callOpenCodeGoAPI(prompt, model, type);
+    console.log("Returning content, length:", content.length);
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
     return res.status(200).json({ content });
   } catch (error) {
+    console.error("Handler error:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
