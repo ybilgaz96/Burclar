@@ -25,6 +25,8 @@ const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanÄ±sÄ
 async function callAPI(prompt, retryCount = 0) {
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+  console.log(`    API Key present: ${API_KEY ? 'YES (length: ' + API_KEY.length + ')' : 'NO'}`);
+
   if (retryCount > 0) {
     console.log(`    Retrying (attempt ${retryCount + 1}/3)...`);
     await delay(Math.min(1000 * Math.pow(2, retryCount), 30000));
@@ -32,7 +34,7 @@ async function callAPI(prompt, retryCount = 0) {
 
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      model: 'qwen3.5-plus',
+      model: 'deepseek-v4-flash',
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
       max_tokens: 600,
       temperature: 0.7
