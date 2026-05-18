@@ -23,6 +23,7 @@ jobs:
       - run: |
           git config --global user.email "ci@github.com"
           git config --global user.name "GitHub CI"
+          git remote set-url origin https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/ybilgaz96/Burclar.git
           git add -A
           git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages"
           git push origin HEAD:main
