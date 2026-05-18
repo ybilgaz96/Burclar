@@ -5,15 +5,7 @@ generate_horoscopes:
   stage: generate
   image: node:20-alpine
   script:
-    - apk add --no-cache git
-    - npm install
-    - node scripts/generate.js
-    - node scripts/build-pages.js
-    - git config --global user.email "ci@gitlab.com"
-    - git config --global user.name "GitLab CI"
-    - git add -A
-    - git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages"
-    - git push origin HEAD:main
+    - bash scripts/ci-generate.sh
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: always
@@ -24,12 +16,3 @@ generate_horoscopes:
       - data/
       - pages/
     expire_in: 1 hour
-
-deploy_preview:
-  stage: generate
-  image: alpine:latest
-  script:
-    - echo "Static pages generated. Vercel will auto-deploy."
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
