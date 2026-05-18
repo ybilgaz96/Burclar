@@ -46,7 +46,10 @@ function buildPages() {
   const dataDir = path.join(__dirname, '..', 'data');
   const templatesDir = path.join(__dirname, '..', 'templates');
   const pagesDir = path.join(__dirname, '..', 'pages');
-  
+  if (!fs.existsSync(pagesDir)) {
+    fs.mkdirSync(pagesDir, { recursive: true });
+  }
+
   const templatePath = path.join(templatesDir, 'page.html');
   let template = fs.readFileSync(templatePath, 'utf8');
 
