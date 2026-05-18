@@ -1,0 +1,26 @@
+name: Generate
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: node scripts/generate.js
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      - run: node scripts/build-pages.js
+      - run: |
+          git config --global user.email "ci@github.com"
+          git config --global user.name "GitHub CI"
+          git add -A
+          git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages"
+          git push origin HEAD:main
