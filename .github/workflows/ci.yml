@@ -1,9 +1,9 @@
-name: Auto Generate
+name: CI
 
 on:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   run:
@@ -16,22 +16,10 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: node scripts/test-api.js
-        env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
       - run: node scripts/generate.js
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      - run: |
-          echo "=== API Debug ===" && cat /tmp/api_response.json || echo "No debug file"
-        continue-on-error: true
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-debug
-          path: /tmp/api_response.json
-          retention-days: 1
-      - run: mkdir -p pages && node scripts/build-pages.js
+      - run: mkdir -p pages data && node scripts/build-pages.js
       - run: |
           git config --global user.email "ci@github.com"
           git config --global user.name "GitHub CI"
