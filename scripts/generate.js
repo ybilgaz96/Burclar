@@ -72,10 +72,17 @@ async function callAPI(prompt, retryCount = 0) {
         }
         try {
           const parsed = JSON.parse(body);
-          console.log(`    [DEBUG] Response parsed, keys: ${Object.keys(parsed).join(', ')}`);
-          const content = parsed.choices?.[0]?.message?.content;
+          let content = parsed.choices?.[0]?.message?.content
+            || parsed.content
+            || parsed.output
+            || parsed.choices?.[0]?.text
+            || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
           if (!content) {
-            console.log(`    [DEBUG] Full response body: ${body.substring(0, 1000)}`);
+            const debugFile = '/tmp/api_response.json';
+            require('fs').writeFileSync(debugFile, JSON.stringify({parsed, body: body.substring(0, 2000)}, null, 2));
+            console.error(`    [DEBUG] No content found, response written to ${debugFile}`);
+            console.error(`    [DEBUG] Response keys: ${Object.keys(parsed).join(', ')}`);
+            console.error(`    [DEBUG] Body preview: ${body.substring(0, 500)}`);
             reject(new Error('No content in API response'));
             return;
           }

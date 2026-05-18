@@ -20,6 +20,16 @@ jobs:
       - run: node scripts/generate.js
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      - run: |
+          if [ -f /tmp/api_response.json ]; then
+            echo "=== API Response Debug ===" && cat /tmp/api_response.json
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-debug
+          path: /tmp/api_response.json
+          retention-days: 1
       - run: node scripts/build-pages.js
       - run: |
           git config --global user.email "ci@github.com"
