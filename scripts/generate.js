@@ -22,7 +22,14 @@ const ZODIAC_SIGNS = [
 
 const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe yaz. Mistik, sıcak, umut verici ama gerçekçi bir dil kullan. Asla kesin tahminler yapma, rehberlik sun. Her yorumda pratik bir tavsiye ekle. Şanslı sayı, renk ve günü de belirt. 150-200 kelime.`;
 
-async function callAPI(prompt) {
+async function callAPI(prompt, retryCount = 0) {
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  if (retryCount > 0) {
+    console.log(`    Retrying (attempt ${retryCount + 1}/3)...`);
+    await delay(Math.min(1000 * Math.pow(2, retryCount), 30000));
+  }
+
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
       model: 'qwen3.5-plus',
@@ -47,6 +54,14 @@ async function callAPI(prompt) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
+        if (res.statusCode === 429) {
+          if (retryCount < 3) {
+            console.log(`    Rate limited, retrying in ${Math.min(1000 * Math.pow(2, retryCount), 30000)}ms...`);
+            return callAPI(prompt, retryCount + 1).then(resolve).catch(reject);
+          }
+          reject(new Error(`API Error 429: Rate limit exceeded after 3 retries`));
+          return;
+        }
         if (res.statusCode !== 200) {
           reject(new Error(`API Error ${res.statusCode}: ${body}`));
           return;
@@ -69,6 +84,10 @@ async function callAPI(prompt) {
     req.write(data);
     req.end();
   });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function getDailyPrompt(sign, date) {
@@ -168,6 +187,11 @@ async function generateHoroscopes() {
       content: monthlyContent,
       lucky: getLuckyInfo(monthlyContent)
     };
+
+    if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
+      console.log('  Waiting 3 seconds before next sign...');
+      await sleep(3000);
+    }
   }
 
   const dataDir = path.join(__dirname, '..', 'data');
