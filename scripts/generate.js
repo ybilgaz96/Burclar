@@ -58,6 +58,9 @@ async function callAPI(prompt, retryCount = 0) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
+        const debugFile = '/tmp/api_response.json';
+        require('fs').writeFileSync(debugFile, JSON.stringify({statusCode: res.statusCode, body: body}, null, 2));
+
         if (res.statusCode === 429) {
           if (retryCount < 3) {
             console.log(`    Rate limited, retrying in ${Math.min(1000 * Math.pow(2, retryCount), 30000)}ms...`);
@@ -72,22 +75,21 @@ async function callAPI(prompt, retryCount = 0) {
         }
         try {
           const parsed = JSON.parse(body);
-          let content = parsed.choices?.[0]?.message?.content
+          const content = parsed.choices?.[0]?.message?.content
             || parsed.content
             || parsed.output
             || parsed.choices?.[0]?.text
             || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
           if (!content) {
-            const debugFile = '/tmp/api_response.json';
-            require('fs').writeFileSync(debugFile, JSON.stringify({parsed, body: body.substring(0, 2000)}, null, 2));
-            console.error(`    [DEBUG] No content found, response written to ${debugFile}`);
-            console.error(`    [DEBUG] Response keys: ${Object.keys(parsed).join(', ')}`);
-            console.error(`    [DEBUG] Body preview: ${body.substring(0, 500)}`);
+            process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
+            process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
+            process.stdout.write('    [DEBUG] Body: ' + body.substring(0, 500) + '\n');
             reject(new Error('No content in API response'));
             return;
           }
           resolve(content);
         } catch (e) {
+          process.stdout.write('    [DEBUG] JSON parse error: ' + e.message + '\n');
           reject(e);
         }
       });
