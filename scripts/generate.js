@@ -25,10 +25,12 @@ const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanÄ±sÄ
 async function callAPI(prompt, retryCount = 0) {
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  console.log(`    API Key present: ${API_KEY ? 'YES (length: ' + API_KEY.length + ')' : 'NO'}`);
+  console.log(`    [DEBUG] API Key: ${API_KEY ? 'SET (len=' + API_KEY.length + ', prefix=' + API_KEY.substring(0, 6) + '...)' : 'NOT SET'}`);
+  console.log(`    [DEBUG] Model: deepseek-v4-flash`);
+  console.log(`    [DEBUG] Attempt: ${retryCount + 1}/3`);
 
   if (retryCount > 0) {
-    console.log(`    Retrying (attempt ${retryCount + 1}/3)...`);
+    console.log(`    [DEBUG] Waiting ${Math.min(1000 * Math.pow(2, retryCount), 30000)}ms before retry...`);
     await delay(Math.min(1000 * Math.pow(2, retryCount), 30000));
   }
 
@@ -134,8 +136,11 @@ function getWeekRange(date) {
 }
 
 async function generateHoroscopes() {
+  console.log('[START] Starting horoscope generation...');
+  console.log('[START] API_KEY status:', API_KEY ? `SET (len=${API_KEY.length})` : 'NOT SET');
+
   if (!API_KEY) {
-    console.error('OPENCODE_API_KEY environment variable is not set');
+    console.error('[ERROR] OPENCODE_API_KEY environment variable is not set');
     process.exit(1);
   }
 

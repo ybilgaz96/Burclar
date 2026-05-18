@@ -1,0 +1,10 @@
+{
+  "name": "burclar",
+  "version": "1.0.0",
+  "description": "Astroloji sitesi",
+  "scripts": {
+    "generate": "node scripts/generate.js",
+    "build": "node scripts/build-pages.js"
+  },
+  "dependencies": {}
+}
