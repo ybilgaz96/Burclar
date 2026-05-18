@@ -61,7 +61,12 @@ const req = https.request(options, (res) => {
 
     try {
       const parsed = JSON.parse(body);
-      console.log('Success! Response:', parsed.choices?.[0]?.message?.content);
+      console.log('Parsed keys:', Object.keys(parsed));
+      const content = parsed.choices?.[0]?.message?.content;
+      if (!content) {
+        console.log('WARNING: No content in response, choices:', JSON.stringify(parsed.choices));
+      }
+      console.log('Success! Response:', content);
     } catch (e) {
       console.log('Could not parse success response');
     }

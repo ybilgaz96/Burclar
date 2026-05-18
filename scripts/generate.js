@@ -72,8 +72,10 @@ async function callAPI(prompt, retryCount = 0) {
         }
         try {
           const parsed = JSON.parse(body);
+          console.log(`    [DEBUG] Response parsed, keys: ${Object.keys(parsed).join(', ')}`);
           const content = parsed.choices?.[0]?.message?.content;
           if (!content) {
+            console.log(`    [DEBUG] Full response body: ${body.substring(0, 1000)}`);
             reject(new Error('No content in API response'));
             return;
           }
