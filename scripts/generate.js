@@ -79,7 +79,9 @@ async function callAPI(prompt, retryCount = 0) {
             || parsed.content
             || parsed.output
             || parsed.choices?.[0]?.text
-            || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+            || parsed.choices?.[0]?.message?.reasoning_content
+            || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
+            || parsed.reasoning; // DeepSeek reasoning field
           if (!content) {
             process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
             process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
