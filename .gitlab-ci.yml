@@ -12,11 +12,13 @@ generate_horoscopes:
     - git config --global user.email "ci@gitlab.com"
     - git config --global user.name "GitLab CI"
     - git add -A
-    - git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages - $(date +'%Y-%m-%d')"
+    - git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages"
     - git push origin HEAD:main
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
     - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
   artifacts:
     paths:
       - data/
@@ -28,6 +30,6 @@ deploy_preview:
   image: alpine:latest
   script:
     - echo "Static pages generated. Vercel will auto-deploy."
-  only:
-    - main
-  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
