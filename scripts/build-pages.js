@@ -19,7 +19,7 @@ const ZODIAC_SIGNS = [
 const SITE_URL = 'https://burclar-tau.vercel.app';
 
 function slugify(text) {
-  return text.toLowerCase().replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 'sh').replace(/ç/g, 'ch').replace(/ö/g, 'o').replace(/\s+/g, '-');
+  return text.toLowerCase().replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ö/g, 'o').replace(/\s+/g, '-');
 }
 
 function formatContent(text) {
