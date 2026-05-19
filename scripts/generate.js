@@ -43,7 +43,8 @@ async function callAPI(prompt, retryCount = 0) {
       model: 'deepseek-v4-flash',
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
       max_tokens: 600,
-      temperature: 0.7
+      temperature: 0.7,
+      enable_thinking: false
     });
 
     const options = {
@@ -79,14 +80,8 @@ async function callAPI(prompt, retryCount = 0) {
         }
         try {
           const parsed = JSON.parse(body);
-          const content = parsed.choices?.[0]?.message?.content
-            || parsed.content
-            || parsed.output
-            || parsed.choices?.[0]?.text
-            || parsed.choices?.[0]?.message?.reasoning_content
-            || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
-            || parsed.reasoning;
-          if (!content) {
+          const content = parsed.choices?.[0]?.message?.content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
+          if (!content || content.toLowerCase().includes("reasoning") || content.toLowerCase().includes("dusunme")) {
             process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
             process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
             process.stdout.write('    [DEBUG] Body: ' + body.substring(0, 500) + '\n');
