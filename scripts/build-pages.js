@@ -45,9 +45,22 @@ function getSignOptions(currentSignId) {
 function buildPages() {
   const dataDir = path.join(__dirname, '..', 'data');
   const templatesDir = path.join(__dirname, '..', 'templates');
+  const rootDir = path.join(__dirname, '..');
 
   const templatePath = path.join(templatesDir, 'page.html');
   let template = fs.readFileSync(templatePath, 'utf8');
+
+  console.log('Cleaning up old slug files...');
+  const oldSlugs = ['koch', 'yengech', 'bashak', 'ikizler'];
+  oldSlugs.forEach(slug => {
+    ['', '-gunluk', '-haftalik', '-aylik'].forEach(suffix => {
+      const file = path.join(rootDir, `${slug}${suffix}.html`);
+      if (fs.existsSync(file)) {
+        fs.unlinkSync(file);
+        console.log(`  Deleted ${slug}${suffix}.html`);
+      }
+    });
+  });
 
   const dataFiles = fs.readdirSync(dataDir).filter(f => f.endsWith('.json'));
   if (dataFiles.length === 0) {
