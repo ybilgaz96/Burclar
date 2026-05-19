@@ -8,6 +8,8 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,8 +25,6 @@ jobs:
       - run: |
           git config --global user.email "ci@github.com"
           git config --global user.name "GitHub CI"
-          git remote set-url origin https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/ybilgaz96/Burclar.git
-          git config --global --unset http.https://github.com/.extraheader || true
           git add -A
           git diff --staged --quiet || git commit -m "ci: auto-generate horoscope pages"
           git push origin HEAD:main
