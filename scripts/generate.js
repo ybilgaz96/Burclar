@@ -79,13 +79,6 @@ async function callAPI(prompt, retryCount = 0) {
           return;
         }
         try {
-          const parsed = JSON.parse(body);
-          const rawContent = parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.message?.reasoning_content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
-          let content = rawContent;
-          if (!parsed.choices?.[0]?.message?.content && parsed.choices?.[0]?.message?.reasoning_content) {
-            content = extractContentFromReasoning(rawContent);
-          }
-
           const extractContentFromReasoning = (text) => {
             const markers = ["şimdi yorumu yazıyorum", "yorumu yaziyorum", "yanıt olarak şunları", "cevap:", "şu bilgileri sunuyorum"];
             let result = text;
@@ -99,6 +92,13 @@ async function callAPI(prompt, retryCount = 0) {
             }
             return result.trim();
           };
+          const parsed = JSON.parse(body);
+          const rawContent = parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.message?.reasoning_content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
+          let content = rawContent;
+          if (!parsed.choices?.[0]?.message?.content && parsed.choices?.[0]?.message?.reasoning_content) {
+            content = extractContentFromReasoning(rawContent);
+          }
+
 
           const isValidContent = (text) => {
             const t = text.toLowerCase();
