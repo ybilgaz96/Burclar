@@ -24,7 +24,17 @@ const ZODIAC_SIGNS = [
   { id: 'pisces', tr: 'Balık', en: 'Pisces', symbol: '♓' }
 ];
 
-const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe yaz. Mistik, sıcak, umut verici ama gerçekçi bir dil kullan. Asla kesin tahminler yapma, rehberlik sun. Her yorumda pratik bir tavsiye ekle. Şanslı sayı, renk ve günü de belirt. 150-200 kelime.`;
+const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe yaz.
+Yanıtını şu formatta ver:
+
+**Aşk:** [2-3 cümle]
+**Kariyer & Para:** [2-3 cümle]
+**Sağlık:** [2-3 cümle]
+**Genel Enerji:** [2-3 cümle]
+**Pratik Tavsiye:** [1 cümle]
+**Şanslı Sayı:** X | **Şanslı Renk:** X | **Şanslı Gün:** X
+
+150-200 kelime yaz.`;
 
 async function callAPI(prompt, retryCount = 0) {
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -40,11 +50,10 @@ async function callAPI(prompt, retryCount = 0) {
 
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      model: 'deepseek-v4-flash',
+      model: 'minimax-m2.7',
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
-      max_tokens: 2000,
-      temperature: 0.7,
-      enable_thinking: false
+      max_tokens: 800,
+      temperature: 0.7
     });
 
     const options = {
@@ -79,30 +88,13 @@ async function callAPI(prompt, retryCount = 0) {
           return;
         }
         try {
-          const extractContentFromReasoning = (text) => {
-            const markers = ["şimdi yorumu yazıyorum", "yorumu yaziyorum", "yanıt olarak şunları", "cevap:", "şu bilgileri sunuyorum"];
-            let result = text;
-            for (const marker of markers) {
-              const idx = text.toLowerCase().indexOf(marker);
-              if (idx !== -1) { result = text.substring(idx + marker.length); break; }
-            }
-            if (result === text && text.length > 200) {
-              const paragraphs = text.split("\n\n");
-              if (paragraphs.length > 2) result = paragraphs.slice(-3).join("\n\n");
-            }
-            return result.trim();
-          };
           const parsed = JSON.parse(body);
-          const rawContent = parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.message?.reasoning_content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
-          let content = rawContent;
-          if (!parsed.choices?.[0]?.message?.content && parsed.choices?.[0]?.message?.reasoning_content) {
-            content = extractContentFromReasoning(rawContent);
-          }
+          const content = parsed.choices?.[0]?.message?.content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
 
 
           const isValidContent = (text) => {
             const t = text.toLowerCase();
-            const bad = ["reasoning", "dusunme", "bu bir talep", "analiz edelim", "verilen talimatlari", "kullanıcının söyledikleri", "rol tanımı", "rolü üstleniyorum", "ifadesi bir rol"];
+            const bad = ["bu bir talep", "analiz edelim", "verilen talimatlari", "kullanıcının söyledikleri", "rol tanımı", "rolü üstleniyorum", "ifadesi bir rol", "ifadesi bir rol"];
             return !bad.some(p => t.includes(p));
           };
 
