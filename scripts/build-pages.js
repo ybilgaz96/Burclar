@@ -19,7 +19,7 @@ const ZODIAC_SIGNS = [
 const SITE_URL = 'https://burclar-tau.vercel.app';
 
 function slugify(text) {
-  return text.toLowerCase().replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ö/g, 'o').replace(/\s+/g, '-');
+  return text.toLowerCase().replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 'sh').replace(/ç/g, 'ch').replace(/ö/g, 'o').replace(/\s+/g, '-');
 }
 
 function formatContent(text) {
@@ -45,10 +45,6 @@ function getSignOptions(currentSignId) {
 function buildPages() {
   const dataDir = path.join(__dirname, '..', 'data');
   const templatesDir = path.join(__dirname, '..', 'templates');
-  const pagesDir = path.join(__dirname, '..', 'pages');
-  if (!fs.existsSync(pagesDir)) {
-    fs.mkdirSync(pagesDir, { recursive: true });
-  }
 
   const templatePath = path.join(templatesDir, 'page.html');
   let template = fs.readFileSync(templatePath, 'utf8');
@@ -123,13 +119,13 @@ function buildPages() {
         .replace(/\{\{MONTHLY_ACTIVE\}\}/g, period === 'monthly' ? 'active' : '')
         .replace(/\{\{SITE_URL\}\}/g, SITE_URL);
 
-      const outputPath = path.join(pagesDir, `${signSlug}-${period === 'daily' ? 'gunluk' : period === 'weekly' ? 'haftalik' : 'aylik'}.html`);
+      const outputPath = path.join(__dirname, '..', `${signSlug}-${period === 'daily' ? 'gunluk' : period === 'weekly' ? 'haftalik' : 'aylik'}.html`);
       fs.writeFileSync(outputPath, page);
       console.log(`  Created ${outputPath}`);
     }
 
     const signPageContent = buildSignIndexPage(sign, data);
-    fs.writeFileSync(path.join(pagesDir, `${signSlug}.html`), signPageContent);
+    fs.writeFileSync(path.join(__dirname, '..', `${signSlug}.html`), signPageContent);
     console.log(`  Created ${signSlug}.html`);
   }
 
@@ -204,8 +200,8 @@ function buildSignIndexPage(sign, data) {
 }
 
 function buildSitemap() {
-  const pagesDir = path.join(__dirname, '..', 'pages');
-  const pages = fs.readdirSync(pagesDir).filter(f => f.endsWith('.html'));
+  const rootDir = __dirname + '/..';
+  const pages = fs.readdirSync(rootDir).filter(f => f.endsWith('.html') && !f.startsWith('index'));
   
   const urls = pages.map(page => {
     const url = page.replace('.html', '');

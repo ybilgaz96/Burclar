@@ -21,7 +21,7 @@ jobs:
       - run: node scripts/generate.js
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      - run: mkdir -p pages data && node scripts/build-pages.js
+      - run: mkdir -p data && node scripts/build-pages.js
       - run: |
           git config --global user.email "ci@github.com"
           git config --global user.name "GitHub CI"
