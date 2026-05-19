@@ -121,7 +121,10 @@ function loadDataFiles() {
     }))
   };
 
-  return { latestDaily, latestWeekly, latestMonthly, archives, dailyFiles, weeklyFiles, monthlyFiles };
+  const dailyDateKeys = dailyFiles.map(f => f.replace("daily-", "").replace(".json", ""));
+  const weeklyDateKeys = weeklyFiles.map(f => f.replace("weekly-", "").replace(".json", ""));
+  const monthlyDateKeys = monthlyFiles.map(f => f.replace("monthly-", "").replace(".json", ""));
+  return { latestDaily, latestWeekly, latestMonthly, archives, dailyFiles, weeklyFiles, monthlyFiles, dailyDateKeys, weeklyDateKeys, monthlyDateKeys };
 }
 
 function buildPageHtml(sign, signSlug, period, dateKey, dateDisplay, periodData, generatedAt, template, allDateKeys, pageType) {
@@ -273,7 +276,7 @@ function buildPages() {
     return;
   }
 
-  const { latestDaily, latestWeekly, latestMonthly, archives, dailyFiles, weeklyFiles, monthlyFiles } = loadDataFiles();
+  const { latestDaily, latestWeekly, latestMonthly, archives, dailyDateKeys, weeklyDateKeys, monthlyDateKeys } = loadDataFiles();
 
   console.log(`Data loaded:`);
   console.log(`  Daily files: ${dailyFiles.length}`);
@@ -283,9 +286,9 @@ function buildPages() {
   for (const sign of ZODIAC_SIGNS) {
     const signSlug = slugify(sign.tr);
 
-    buildDailyPages(sign, signSlug, latestDaily, archives.daily, dailyFiles, template);
-    buildWeeklyPages(sign, signSlug, latestWeekly, archives.weekly, weeklyFiles, template);
-    buildMonthlyPages(sign, signSlug, latestMonthly, archives.monthly, monthlyFiles, template);
+    buildDailyPages(sign, signSlug, latestDaily, archives.daily, dailyDateKeys, template);
+    buildWeeklyPages(sign, signSlug, latestWeekly, archives.weekly, weeklyDateKeys, template);
+    buildMonthlyPages(sign, signSlug, latestMonthly, archives.monthly, monthlyDateKeys, template);
 
     const signPageContent = buildSignIndexPage(sign, latestDaily, latestWeekly, latestMonthly);
     fs.writeFileSync(path.join(__dirname, '..', `${signSlug}.html`), signPageContent);

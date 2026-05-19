@@ -81,7 +81,12 @@ async function callAPI(prompt, retryCount = 0) {
         try {
           const parsed = JSON.parse(body);
           const content = parsed.choices?.[0]?.message?.content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
-          if (!content || content.toLowerCase().includes("reasoning") || content.toLowerCase().includes("dusunme")) {
+          const isValidContent = (text) => {
+            const t = text.toLowerCase();
+            const bad = ["reasoning", "dusunme", "bu bir talep", "analiz edelim", "verilen talimatlari", "kullanıcının söyledikleri", "rol tanımı", "rolü üstleniyorum", "ifadesi bir rol"];
+            return !bad.some(p => t.includes(p));
+          };
+          if (!content || !isValidContent(content)) {
             process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
             process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
             process.stdout.write('    [DEBUG] Body: ' + body.substring(0, 500) + '\n');
