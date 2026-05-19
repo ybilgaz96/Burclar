@@ -42,7 +42,7 @@ async function callAPI(prompt, retryCount = 0) {
     const data = JSON.stringify({
       model: 'deepseek-v4-flash',
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
-      max_tokens: 600,
+      max_tokens: 2000,
       temperature: 0.7,
       enable_thinking: false
     });
@@ -80,17 +80,37 @@ async function callAPI(prompt, retryCount = 0) {
         }
         try {
           const parsed = JSON.parse(body);
-          const content = parsed.choices?.[0]?.message?.content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
+          const rawContent = parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.message?.reasoning_content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
+          let content = rawContent;
+          if (!parsed.choices?.[0]?.message?.content && parsed.choices?.[0]?.message?.reasoning_content) {
+            content = extractContentFromReasoning(rawContent);
+          }
+
+          const extractContentFromReasoning = (text) => {
+            const markers = ["şimdi yorumu yazıyorum", "yorumu yaziyorum", "yanıt olarak şunları", "cevap:", "şu bilgileri sunuyorum"];
+            let result = text;
+            for (const marker of markers) {
+              const idx = text.toLowerCase().indexOf(marker);
+              if (idx !== -1) { result = text.substring(idx + marker.length); break; }
+            }
+            if (result === text && text.length > 200) {
+              const paragraphs = text.split("\n\n");
+              if (paragraphs.length > 2) result = paragraphs.slice(-3).join("\n\n");
+            }
+            return result.trim();
+          };
+
           const isValidContent = (text) => {
             const t = text.toLowerCase();
             const bad = ["reasoning", "dusunme", "bu bir talep", "analiz edelim", "verilen talimatlari", "kullanıcının söyledikleri", "rol tanımı", "rolü üstleniyorum", "ifadesi bir rol"];
             return !bad.some(p => t.includes(p));
           };
+
           if (!content || !isValidContent(content)) {
-            process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
-            process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
-            process.stdout.write('    [DEBUG] Body: ' + body.substring(0, 500) + '\n');
-            reject(new Error('No content in API response'));
+            process.stdout.write("    [DEBUG] No content - full response in /tmp/api_response.json\n");
+            process.stdout.write("    [DEBUG] Response keys: " + Object.keys(parsed).join(", ") + "\n");
+            process.stdout.write("    [DEBUG] Body: " + body.substring(0, 500) + "\n");
+            reject(new Error("No content in API response"));
             return;
           }
           resolve(content);
