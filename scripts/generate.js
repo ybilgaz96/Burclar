@@ -50,7 +50,7 @@ async function callAPI(prompt, retryCount = 0) {
 
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      model: 'minimax-m2.7',
+      model: 'qwen3.6-plus',
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
       max_tokens: 800,
       temperature: 0.7
