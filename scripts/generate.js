@@ -5,6 +5,10 @@ const path = require('path');
 const OPENCODE_GO_ENDPOINT = 'https://opencode.ai/zen/go/v1/chat/completions';
 const API_KEY = process.env.OPENCODE_API_KEY;
 
+const args = process.argv.slice(2);
+const typeArg = args.find(a => a.startsWith('--type='));
+const GENERATE_TYPE = typeArg ? typeArg.split('=')[1] : 'all';
+
 const ZODIAC_SIGNS = [
   { id: 'aries', tr: 'Koç', en: 'Aries', symbol: '♈' },
   { id: 'taurus', tr: 'Boğa', en: 'Taurus', symbol: '♉' },
@@ -81,7 +85,7 @@ async function callAPI(prompt, retryCount = 0) {
             || parsed.choices?.[0]?.text
             || parsed.choices?.[0]?.message?.reasoning_content
             || parsed.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
-            || parsed.reasoning; // DeepSeek reasoning field
+            || parsed.reasoning;
           if (!content) {
             process.stdout.write('    [DEBUG] No content - full response in /tmp/api_response.json\n');
             process.stdout.write('    [DEBUG] Response keys: ' + Object.keys(parsed).join(', ') + '\n');
@@ -144,72 +148,45 @@ function getWeekRange(date) {
   end.setDate(start.getDate() + 6);
   return {
     start: start.toLocaleDateString('tr-TR'),
-    end: end.toLocaleDateString('tr-TR')
+    end: end.toLocaleDateString('tr-TR'),
+    startIso: start.toISOString().split('T')[0],
+    endIso: end.toISOString().split('T')[0]
   };
 }
 
-async function generateHoroscopes() {
-  console.log('[START] Starting horoscope generation...');
-  console.log('[START] API_KEY status:', API_KEY ? `SET (len=${API_KEY.length})` : 'NOT SET');
+function getWeekISO(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const start = new Date(d.setDate(diff));
+  const yearStart = new Date(start.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(((start - yearStart) / 86400000 + 1) / 7);
+  return `${start.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
 
-  if (!API_KEY) {
-    console.error('[ERROR] OPENCODE_API_KEY environment variable is not set');
-    process.exit(1);
-  }
-
+async function generateDaily() {
   const today = new Date();
   const dateStr = today.toISOString().split('T')[0];
-  const weekRange = getWeekRange(today);
-  const month = today.getMonth();
-  const year = today.getFullYear();
-  const monthName = today.toLocaleDateString('tr-TR', { month: 'long' });
 
-  console.log(`Generating horoscopes for ${dateStr}...`);
-  console.log(`Week: ${weekRange.start} - ${weekRange.end}`);
-  console.log(`Month: ${monthName} ${year}`);
+  console.log(`[DAILY] Generating daily horoscopes for ${dateStr}...`);
 
   const data = {
     generatedAt: new Date().toISOString(),
     date: dateStr,
-    weekRange: weekRange,
-    month: { name: monthName, year: year },
-    daily: {},
-    weekly: {},
-    monthly: {}
+    type: 'daily',
+    daily: {}
   };
 
   for (const sign of ZODIAC_SIGNS) {
-    console.log(`\nProcessing ${sign.tr}...`);
-
-    console.log('  - Daily...');
-    const dailyContent = await callAPI(getDailyPrompt(sign, today));
+    console.log(`  Processing ${sign.tr}...`);
+    const content = await callAPI(getDailyPrompt(sign, today));
     data.daily[sign.id] = {
       name: sign.tr,
       symbol: sign.symbol,
-      content: dailyContent,
-      lucky: getLuckyInfo(dailyContent)
+      content: content,
+      lucky: getLuckyInfo(content)
     };
-
-    console.log('  - Weekly...');
-    const weeklyContent = await callAPI(getWeeklyPrompt(sign, weekRange.start, weekRange.end));
-    data.weekly[sign.id] = {
-      name: sign.tr,
-      symbol: sign.symbol,
-      content: weeklyContent,
-      lucky: getLuckyInfo(weeklyContent)
-    };
-
-    console.log('  - Monthly...');
-    const monthlyContent = await callAPI(getMonthlyPrompt(sign, month, year));
-    data.monthly[sign.id] = {
-      name: sign.tr,
-      symbol: sign.symbol,
-      content: monthlyContent,
-      lucky: getLuckyInfo(monthlyContent)
-    };
-
     if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
-      console.log('  Waiting 3 seconds before next sign...');
       await sleep(3000);
     }
   }
@@ -219,14 +196,120 @@ async function generateHoroscopes() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  const filePath = path.join(dataDir, `${dateStr}.json`);
+  const filePath = path.join(dataDir, `daily-${dateStr}.json`);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  console.log(`\nSaved to ${filePath}`);
-
+  console.log(`[DAILY] Saved to ${filePath}`);
   return data;
 }
 
-generateHoroscopes().catch(err => {
+async function generateWeekly() {
+  const today = new Date();
+  const weekRange = getWeekRange(today);
+  const weekIso = getWeekISO(today);
+
+  console.log(`[WEEKLY] Generating weekly horoscopes for ${weekRange.start} - ${weekRange.end} (${weekIso})...`);
+
+  const data = {
+    generatedAt: new Date().toISOString(),
+    date: weekRange.startIso,
+    weekEnd: weekRange.endIso,
+    weekIso: weekIso,
+    type: 'weekly',
+    weekly: {}
+  };
+
+  for (const sign of ZODIAC_SIGNS) {
+    console.log(`  Processing ${sign.tr}...`);
+    const content = await callAPI(getWeeklyPrompt(sign, weekRange.start, weekRange.end));
+    data.weekly[sign.id] = {
+      name: sign.tr,
+      symbol: sign.symbol,
+      content: content,
+      lucky: getLuckyInfo(content)
+    };
+    if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
+      await sleep(3000);
+    }
+  }
+
+  const dataDir = path.join(__dirname, '..', 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  const filePath = path.join(dataDir, `weekly-${weekIso}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  console.log(`[WEEKLY] Saved to ${filePath}`);
+  return data;
+}
+
+async function generateMonthly() {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+  const monthName = today.toLocaleDateString('tr-TR', { month: 'long' });
+  const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+  console.log(`[MONTHLY] Generating monthly horoscopes for ${monthName} ${year} (${monthStr})...`);
+
+  const data = {
+    generatedAt: new Date().toISOString(),
+    date: `${year}-${String(month + 1).padStart(2, '0')}-01`,
+    monthName: monthName,
+    year: year,
+    monthNum: month + 1,
+    type: 'monthly',
+    monthly: {}
+  };
+
+  for (const sign of ZODIAC_SIGNS) {
+    console.log(`  Processing ${sign.tr}...`);
+    const content = await callAPI(getMonthlyPrompt(sign, month, year));
+    data.monthly[sign.id] = {
+      name: sign.tr,
+      symbol: sign.symbol,
+      content: content,
+      lucky: getLuckyInfo(content)
+    };
+    if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
+      await sleep(3000);
+    }
+  }
+
+  const dataDir = path.join(__dirname, '..', 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  const filePath = path.join(dataDir, `monthly-${monthStr}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  console.log(`[MONTHLY] Saved to ${filePath}`);
+  return data;
+}
+
+async function main() {
+  console.log(`[START] Starting horoscope generation... Type: ${GENERATE_TYPE}`);
+  console.log(`[START] API_KEY status: ${API_KEY ? `SET (len=${API_KEY.length})` : 'NOT SET'}`);
+
+  if (!API_KEY) {
+    console.error('[ERROR] OPENCODE_API_KEY environment variable is not set');
+    process.exit(1);
+  }
+
+  if (GENERATE_TYPE === 'all' || GENERATE_TYPE === 'daily') {
+    await generateDaily();
+  }
+  if (GENERATE_TYPE === 'all' || GENERATE_TYPE === 'weekly') {
+    await generateWeekly();
+  }
+  if (GENERATE_TYPE === 'all' || GENERATE_TYPE === 'monthly') {
+    await generateMonthly();
+  }
+
+  console.log('[DONE] All requested horoscopes generated.');
+}
+
+main().catch(err => {
   console.error('Error:', err.message);
   process.exit(1);
 });

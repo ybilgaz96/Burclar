@@ -14,15 +14,45 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - run: npm install
-      - run: node scripts/generate.js
+
+      - name: Check day of week
+        id: day-check
+        run: |
+          DAY=$(date +%u)
+          DATE=$(date +%-d)
+          echo "day=$DAY" >> $GITHUB_OUTPUT
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "Is Monday (1)?: $([ $DAY -eq 1 ] && echo true || echo false)"
+          echo "Is 1st of month?: $([ $DATE -eq 1 ] && echo true || echo false)"
+
+      - name: Generate daily (always)
+        run: node scripts/generate.js --type=daily
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      - run: mkdir -p data && node scripts/build-pages.js
-      - run: |
+
+      - name: Generate weekly (Mondays only)
+        if: steps.day-check.outputs.day == '1'
+        run: node scripts/generate.js --type=weekly
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Generate monthly (1st of month only)
+        if: steps.day-check.outputs.date == '1'
+        run: node scripts/generate.js --type=monthly
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Build pages
+        run: node scripts/build-pages.js
+
+      - name: Commit and push
+        run: |
           git config --global user.email "ci@github.com"
           git config --global user.name "GitHub CI"
           git add -A

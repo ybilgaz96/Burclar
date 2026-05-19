@@ -1416,3 +1416,36 @@ footer {
 .ad-space ins {
   min-height: 90px;
 }
+
+.date-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  padding: 10px 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--accent-gold);
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+}
+
+.nav-btn-prev {
+  order: 1;
+}
+
+.nav-btn-next {
+  order: 2;
+  margin-left: auto;
+}
