@@ -61,6 +61,26 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://burclar-tau.vercel.app/basak-aylik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/basak-gunluk</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/basak-haftalik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/basak</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://burclar-tau.vercel.app/bashak-aylik</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -117,6 +137,26 @@
   </url>
   <url>
     <loc>https://burclar-tau.vercel.app/i̇kizler</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/koc-aylik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/koc-gunluk</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/koc-haftalik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/koc</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -217,6 +257,26 @@
   </url>
   <url>
     <loc>https://burclar-tau.vercel.app/yay</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/yengec-aylik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/yengec-gunluk</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/yengec-haftalik</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://burclar-tau.vercel.app/yengec</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
