@@ -279,10 +279,10 @@ function buildPages() {
   const { latestDaily, latestWeekly, latestMonthly, archives, dailyDateKeys, weeklyDateKeys, monthlyDateKeys } = loadDataFiles();
 
   console.log(`Data loaded:`);
-  console.log(`  Daily files: ${dailyFiles.length}`);
-  console.log(`  Weekly files: ${weeklyFiles.length}`);
-  console.log(`  Monthly files: ${monthlyFiles.length}`);
-
+    console.log(`Data loaded:`);
+    console.log(`  Daily files: `);
+    console.log(`  Weekly files: `);
+    console.log(`  Monthly files: `);
   for (const sign of ZODIAC_SIGNS) {
     const signSlug = slugify(sign.tr);
 
