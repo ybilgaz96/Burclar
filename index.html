@@ -7,9 +7,11 @@
   <meta name="description" content="Kova, Koç, Boğa ve tüm burçlar için günlük, haftalık ve aylık AI destekli burç yorumları. Astroloji rehberinizi keşfedin.">
   <meta name="keywords" content="burç, yorum, günlük burç, haftalık burç, aylık burç, astroloji, kova burcu, koç burcu, boğa burcu">
   <link rel="canonical" href="https://burclar-tau.vercel.app/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
   <meta property="og:title" content="KozmikRehber - Burç Yorumları">
   <meta property="og:description" content="Tüm burçlar için günlük, haftalık ve aylık AI destekli yorumlar.">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="https://burclar-tau.vercel.app/og-image.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
   <script type="application/ld+json">
@@ -253,18 +255,13 @@
       </section>
 
       <section class="ad-section">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-XXXXXXXXXX"
-             data-ad-slot="XXXXXXXXXX"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <!-- AdSense: Replace ca-pub-XXXXXXXXXX with your actual AdSense publisher ID and slot IDs -->
       </section>
 
       <section class="newsletter-landing">
         <h2>Haftalık Burç Yorumu E-postana Gelsin</h2>
         <p>Her Pazartesi güncel burç yorumları için kaydol.</p>
-        <form class="newsletter-form" action="#" method="post">
+        <form class="newsletter-form" id="newsletter-form">
           <input type="email" name="email" placeholder="E-posta adresin" required>
           <select name="sign">
             <option value="">Burcunu seç</option>
@@ -283,6 +280,7 @@
           </select>
           <button type="submit">Kaydol</button>
         </form>
+        <p class="newsletter-status" id="newsletter-status"></p>
       </section>
     </main>
 
@@ -301,6 +299,17 @@
 
   <script src="/i18n.js"></script>
   <script src="/tools.js"></script>
-  <script src="/app-init.js"></script>
+  <script src="/app.js"></script>
+  <script>
+    document.getElementById('newsletter-form')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = document.getElementById('newsletter-status');
+      const email = this.querySelector('input[name="email"]').value;
+      const sign = this.querySelector('select[name="sign"]').value;
+      status.textContent = 'Bülten sistemi yakında aktif olacak. Şimdilik günlük siteyi takip etmeye devam et! 🌙';
+      status.style.color = '#d4af37';
+      this.reset();
+    });
+  </script>
 </body>
 </html>

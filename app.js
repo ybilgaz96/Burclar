@@ -1,55 +1,7 @@
 let selectedSign = null;
 let currentPeriod = "daily";
 let currentView = "horoscope";
-
-function initStarfield() {
-  const canvas = document.getElementById("starfield");
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  
-  const stars = [];
-  for (let i = 0; i < 200; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 1.5,
-      speed: Math.random() * 0.5 + 0.1,
-      opacity: Math.random()
-    });
-  }
-  
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    stars.forEach(star => {
-      star.opacity += (Math.random() - 0.5) * 0.1;
-      star.opacity = Math.max(0.1, Math.min(1, star.opacity));
-      
-      ctx.beginPath();
-      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(245, 240, 232, ${star.opacity})`;
-      ctx.fill();
-      
-      star.y -= star.speed;
-      if (star.y < 0) {
-        star.y = canvas.height;
-        star.x = Math.random() * canvas.width;
-      }
-    });
-    
-    requestAnimationFrame(animate);
-  }
-  
-  window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
-  
-  animate();
-}
+let starfieldAnimation = null;
 
 function updateMoonPhase() {
   const moon = getMoonPhase();
@@ -104,6 +56,59 @@ function setPeriod(period) {
   if (selectedSign) renderReading();
 }
 
+function initStarfield() {
+  const canvas = document.getElementById("starfield");
+  if (!canvas) return;
+  
+  if (starfieldAnimation) {
+    cancelAnimationFrame(starfieldAnimation);
+  }
+  
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const stars = [];
+  for (let i = 0; i < 150; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.5,
+      speed: Math.random() * 0.5 + 0.1,
+      opacity: Math.random()
+    });
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    stars.forEach(star => {
+      star.opacity += (Math.random() - 0.5) * 0.1;
+      star.opacity = Math.max(0.1, Math.min(1, star.opacity));
+      
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245, 240, 232, ${star.opacity})`;
+      ctx.fill();
+      
+      star.y -= star.speed;
+      if (star.y < 0) {
+        star.y = canvas.height;
+        star.x = Math.random() * canvas.width;
+      }
+    });
+    
+    starfieldAnimation = requestAnimationFrame(animate);
+  }
+  
+  window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+  
+  animate();
+}
+
 function showView(view) {
   currentView = view;
   
@@ -115,11 +120,9 @@ function showView(view) {
   
   const readingSection = document.getElementById("reading-section");
   const toolsSection = document.getElementById("tools-section");
-  const premiumSection = document.getElementById("premium-section");
   
   if (readingSection) readingSection.classList.remove("hidden");
   if (toolsSection) toolsSection.classList.add("hidden");
-  if (premiumSection) premiumSection.classList.add("hidden");
   
   if (selectedSign) renderReading();
 }
@@ -129,23 +132,9 @@ function showTools() {
   
   const readingSection = document.getElementById("reading-section");
   const toolsSection = document.getElementById("tools-section");
-  const premiumSection = document.getElementById("premium-section");
   
   if (readingSection) readingSection.classList.add("hidden");
   if (toolsSection) toolsSection.classList.remove("hidden");
-  if (premiumSection) premiumSection.classList.add("hidden");
-}
-
-function showPremium() {
-  currentView = "premium";
-  
-  const readingSection = document.getElementById("reading-section");
-  const toolsSection = document.getElementById("tools-section");
-  const premiumSection = document.getElementById("premium-section");
-  
-  if (readingSection) readingSection.classList.add("hidden");
-  if (toolsSection) toolsSection.classList.add("hidden");
-  if (premiumSection) premiumSection.classList.remove("hidden");
 }
 
 async function renderReading() {
@@ -207,7 +196,7 @@ async function renderReading() {
             📋 ${t("share.copy")}
           </button>
           <button class="share-btn" onclick="shareToTwitter('${selectedSign}', \`${contentText.replace(/`/g, "\\`")}\`)">
-            𝕏 ${lang === "tr" ? "X'te Paylaş" : "Share on X"}
+            𝕏 ${t("share.shareOnX")}
           </button>
           <button class="share-btn" onclick="shareToWhatsApp('${selectedSign}', \`${contentText.replace(/`/g, "\\`")}\`)">
             💬 WhatsApp
@@ -240,18 +229,21 @@ function createErrorHTML(message, retryFn) {
 
 function copyReading(sign, content) {
   const text = `${getZodiacName(sign)} - ${getTodayDate()}\n\n${content}`;
-  navigator.clipboard.writeText(text).then(() => {
+  const encoded = text.replace(/[<>]/g, '');
+  navigator.clipboard.writeText(encoded).then(() => {
     showToast(t("share.copied"));
   });
 }
 
 function shareToTwitter(sign, content) {
-  const text = encodeURIComponent(`${getZodiacName(sign)} burcu bugün: ${content.slice(0, 200)}...`);
+  const clean = content.replace(/[<>]/g, '').slice(0, 200);
+  const text = encodeURIComponent(`${getZodiacName(sign)} burcu bugün: ${clean}...`);
   window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
 }
 
 function shareToWhatsApp(sign, content) {
-  const text = encodeURIComponent(`${getZodiacName(sign)} - ${getTodayDate()}\n\n${content.slice(0, 500)}`);
+  const clean = content.replace(/[<>]/g, '').slice(0, 500);
+  const text = encodeURIComponent(`${getZodiacName(sign)} - ${getTodayDate()}\n\n${clean}`);
   window.open(`https://wa.me/?text=${text}`, "_blank");
 }
 
@@ -288,7 +280,7 @@ function closeModal(modalId) {
 
 async function handleOracleSubmit() {
   if (!selectedSign) {
-    alert(getCurrentLanguage() === "tr" ? "Lütfen önce burcunu seç!" : "Please select your sign first!");
+    alert(t("alerts.selectSign"));
     return;
   }
   
@@ -320,7 +312,7 @@ async function handleOracleSubmit() {
 }
 
 function updateOracleCounter() {
-  const { count } = getOraclesQuestionsToday();
+  const { count } = getOracleQuestionsToday();
   const remaining = 3 - count;
   const remainingEl = document.getElementById("oracles-remaining");
   if (remainingEl) {
@@ -381,7 +373,7 @@ function handleBirthChart() {
   const resultEl = document.getElementById("birth-chart-result");
   
   if (!name || !date) {
-    alert(getCurrentLanguage() === "tr" ? "Lütfen tüm alanları doldurun!" : "Please fill in all fields!");
+    alert(t("alerts.fillAllFields"));
     return;
   }
   
@@ -416,7 +408,7 @@ function handleNumerology() {
   const resultEl = document.getElementById("numerology-result");
   
   if (!name || !date) {
-    alert(getCurrentLanguage() === "tr" ? "Lütfen tüm alanları doldurun!" : "Please fill in all fields!");
+    alert(t("alerts.fillAllFields"));
     return;
   }
   
@@ -566,7 +558,7 @@ function initApp() {
       if (selectedSign) {
         renderReading();
       } else {
-        alert(getCurrentLanguage() === "tr" ? "Lütfen önce burcunu seç!" : "Please select your sign first!");
+        alert(t("alerts.selectSign"));
       }
     });
   }

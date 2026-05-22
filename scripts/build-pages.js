@@ -21,14 +21,26 @@ const ARCHIVE_DAILY_COUNT = 7;
 const ARCHIVE_WEEKLY_COUNT = 4;
 const ARCHIVE_MONTHLY_COUNT = 12;
 
-const PERIOD_DIRS = {
-  daily: 'gunluk',
-  weekly: 'haftalik',
-  monthly: 'aylik'
+const PERIOD_SUFFIX = {
+  daily: '-gunluk',
+  weekly: '-haftalik',
+  monthly: '-aylik'
 };
 
+const PERIOD_DIR_NAMES = ['gunluk', 'haftalik', 'aylik'];
+
 function slugify(text) {
-  return text.toLowerCase().replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ö/g, 'o').replace(/\s+/g, '-');
+  return text
+    .replace(/İ/g, 'i')
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ç/g, 'c')
+    .replace(/ö/g, 'o')
+    .replace(/i̇/g, 'i')
+    .toLowerCase()
+    .replace(/\s+/g, '-');
 }
 
 function formatContent(text) {
@@ -59,18 +71,16 @@ function getMonthDisplay(monthStr) {
   return d.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
 }
 
-function ensureDir(dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
+function getPeriodSuffix(period) {
+  return PERIOD_SUFFIX[period];
 }
 
-function getOtherSignsHtml(currentSignId, period, dateLabel) {
-  const periodDir = PERIOD_DIRS[period];
+function getOtherSignsHtml(currentSignId, period) {
+  const suffix = getPeriodSuffix(period);
   return ZODIAC_SIGNS
     .filter(s => s.id !== currentSignId)
     .map(s => {
-      const url = `/${periodDir}/${slugify(s.tr)}.html`;
+      const url = `/${slugify(s.tr)}${suffix}.html`;
       return `<a href="${url}" class="sign-card"><span class="symbol">${s.symbol}</span><span class="name">${s.tr}</span></a>`;
     })
     .join('');
@@ -82,7 +92,8 @@ function getSignOptions(currentSignId) {
     .join('');
 }
 
-function getDateNavigationHtml(signSlug, period, dateKey, allDateKeys, periodDir) {
+function getDateNavigationHtml(signSlug, period, dateKey, allDateKeys) {
+  const suffix = getPeriodSuffix(period);
   const currentIndex = allDateKeys.indexOf(dateKey);
   const prevKey = currentIndex > 0 ? allDateKeys[currentIndex - 1] : null;
   const nextKey = currentIndex < allDateKeys.length - 1 ? allDateKeys[currentIndex + 1] : null;
@@ -91,14 +102,14 @@ function getDateNavigationHtml(signSlug, period, dateKey, allDateKeys, periodDir
   let nextHtml = '';
 
   if (prevKey) {
-    const prevUrl = `/${periodDir}/${signSlug}-${prevKey}.html`;
-    const prevLabel = periodDir === 'gunluk' ? parseDateDisplay(prevKey) : periodDir === 'haftalik' ? getWeekDisplay(prevKey) : getMonthDisplay(prevKey);
+    const prevUrl = `/${signSlug}${suffix}-${prevKey}.html`;
+    const prevLabel = period === 'daily' ? parseDateDisplay(prevKey) : period === 'weekly' ? getWeekDisplay(prevKey) : getMonthDisplay(prevKey);
     prevHtml = `<a href="${prevUrl}" class="nav-btn nav-btn-prev">← ${prevLabel}</a>`;
   }
 
   if (nextKey) {
-    const nextUrl = `/${periodDir}/${signSlug}-${nextKey}.html`;
-    const nextLabel = periodDir === 'gunluk' ? parseDateDisplay(nextKey) : periodDir === 'haftalik' ? getWeekDisplay(nextKey) : getMonthDisplay(nextKey);
+    const nextUrl = `/${signSlug}${suffix}-${nextKey}.html`;
+    const nextLabel = period === 'daily' ? parseDateDisplay(nextKey) : period === 'weekly' ? getWeekDisplay(nextKey) : getMonthDisplay(nextKey);
     nextHtml = `<a href="${nextUrl}" class="nav-btn nav-btn-next">${nextLabel} →</a>`;
   }
 
@@ -138,25 +149,29 @@ function loadDataFiles() {
   const weeklyDateKeys = weeklyFiles.map(f => f.replace('weekly-', '').replace('.json', ''));
   const monthlyDateKeys = monthlyFiles.map(f => f.replace('monthly-', '').replace('.json', ''));
 
-  return { latestDaily, latestWeekly, latestMonthly, archives, dailyFiles, weeklyFiles, monthlyFiles, dailyDateKeys, weeklyDateKeys, monthlyDateKeys };
+  return { latestDaily, latestWeekly, latestMonthly, archives, dailyDateKeys, weeklyDateKeys, monthlyDateKeys };
 }
 
 function buildPageHtml(sign, signSlug, period, dateKey, dateDisplay, periodData, generatedAt, template, allDateKeys, pageType) {
   const periodLabels = {
-    daily: { label: 'Günlük', title: 'Günlük Yorumu', period: 'gunluk' },
-    weekly: { label: 'Haftalık', title: 'Haftalık Yorum', period: 'haftalik' },
-    monthly: { label: 'Aylık', title: 'Aylık Yorum', period: 'aylik' }
+    daily: { label: 'Günlük', title: 'Günlük Yorumu' },
+    weekly: { label: 'Haftalık', title: 'Haftalık Yorum' },
+    monthly: { label: 'Aylık', title: 'Aylık Yorum' }
   };
 
   const periodInfo = periodLabels[period];
-  const periodDir = PERIOD_DIRS[period];
-  
+  const suffix = getPeriodSuffix(period);
+
   const canonicalUrl = pageType === 'archive'
-    ? `${SITE_URL}/${periodDir}/${signSlug}-${dateKey}.html`
-    : `${SITE_URL}/${periodDir}/${signSlug}.html`;
-    
+    ? `${SITE_URL}/${signSlug}${suffix}-${dateKey}.html`
+    : `${SITE_URL}/${signSlug}${suffix}.html`;
+
   const contentHtml = formatContent(periodData.content);
-  const navHtml = getDateNavigationHtml(signSlug, period, dateKey, allDateKeys, periodDir);
+  const navHtml = getDateNavigationHtml(signSlug, period, dateKey, allDateKeys);
+
+  const dailyUrl = `/${signSlug}-gunluk.html`;
+  const weeklyUrl = `/${signSlug}-haftalik.html`;
+  const monthlyUrl = `/${signSlug}-aylik.html`;
 
   let page = template
     .replace(/\{\{TITLE\}\}/g, `${sign.tr} Burcu ${periodInfo.title} - ${dateDisplay}`)
@@ -177,11 +192,11 @@ function buildPageHtml(sign, signSlug, period, dateKey, dateDisplay, periodData,
     .replace(/\{\{LUCKY_NUMBER\}\}/g, periodData.lucky.number)
     .replace(/\{\{LUCKY_COLOR\}\}/g, periodData.lucky.color)
     .replace(/\{\{LUCKY_DAY\}\}/g, periodData.lucky.day)
-    .replace(/\{\{OTHER_SIGNS\}\}/g, getOtherSignsHtml(sign.id, period, dateKey ? dateKey : ''))
+    .replace(/\{\{OTHER_SIGNS\}\}/g, getOtherSignsHtml(sign.id, period))
     .replace(/\{\{SIGN_OPTIONS\}\}/g, getSignOptions(sign.id))
-    .replace(/\{\{DAILY_URL\}\}/g, `/gunluk/${signSlug}.html`)
-    .replace(/\{\{WEEKLY_URL\}\}/g, `/haftalik/${signSlug}.html`)
-    .replace(/\{\{MONTHLY_URL\}\}/g, `/aylik/${signSlug}.html`)
+    .replace(/\{\{DAILY_URL\}\}/g, dailyUrl)
+    .replace(/\{\{WEEKLY_URL\}\}/g, weeklyUrl)
+    .replace(/\{\{MONTHLY_URL\}\}/g, monthlyUrl)
     .replace(/\{\{DAILY_ACTIVE\}\}/g, period === 'daily' ? 'active' : '')
     .replace(/\{\{WEEKLY_ACTIVE\}\}/g, period === 'weekly' ? 'active' : '')
     .replace(/\{\{MONTHLY_ACTIVE\}\}/g, period === 'monthly' ? 'active' : '')
@@ -194,17 +209,17 @@ function buildPageHtml(sign, signSlug, period, dateKey, dateDisplay, periodData,
 
 function buildDailyPages(sign, signSlug, latestDaily, dailyArchives, dailyFiles, template) {
   const period = 'daily';
-  const periodDir = PERIOD_DIRS.daily;
-
-  ensureDir(path.join(__dirname, '..', periodDir));
+  const suffix = getPeriodSuffix(period);
+  const rootDir = path.join(__dirname, '..');
 
   if (latestDaily) {
     const periodData = latestDaily.daily?.[sign.id];
     if (periodData) {
       const dateDisplay = parseDateDisplay(latestDaily.date);
       const page = buildPageHtml(sign, signSlug, period, latestDaily.date, dateDisplay, periodData, latestDaily.generatedAt, template, dailyFiles, null);
-      fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}.html`), page);
-      console.log(`  Created ${periodDir}/${signSlug}.html (${latestDaily.date})`);
+      const filename = `${signSlug}${suffix}.html`;
+      fs.writeFileSync(path.join(rootDir, filename), page);
+      console.log(`  Created ${filename} (${latestDaily.date})`);
     }
   }
 
@@ -214,24 +229,25 @@ function buildDailyPages(sign, signSlug, latestDaily, dailyArchives, dailyFiles,
 
     const dateDisplay = parseDateDisplay(archive.key);
     const page = buildPageHtml(sign, signSlug, period, archive.key, dateDisplay, periodData, archive.data.generatedAt, template, dailyFiles, 'archive');
-    fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}-${archive.key}.html`), page);
-    console.log(`  Created ${periodDir}/${signSlug}-${archive.key}.html`);
+    const filename = `${signSlug}${suffix}-${archive.key}.html`;
+    fs.writeFileSync(path.join(rootDir, filename), page);
+    console.log(`  Created ${filename}`);
   });
 }
 
 function buildWeeklyPages(sign, signSlug, latestWeekly, weeklyArchives, weeklyFiles, template) {
   const period = 'weekly';
-  const periodDir = PERIOD_DIRS.weekly;
-
-  ensureDir(path.join(__dirname, '..', periodDir));
+  const suffix = getPeriodSuffix(period);
+  const rootDir = path.join(__dirname, '..');
 
   if (latestWeekly) {
     const periodData = latestWeekly.weekly?.[sign.id];
     if (periodData) {
       const weekDisplay = getWeekDisplay(latestWeekly.weekIso);
       const page = buildPageHtml(sign, signSlug, period, latestWeekly.weekIso, weekDisplay, periodData, latestWeekly.generatedAt, template, weeklyFiles, null);
-      fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}.html`), page);
-      console.log(`  Created ${periodDir}/${signSlug}.html (${latestWeekly.weekIso})`);
+      const filename = `${signSlug}${suffix}.html`;
+      fs.writeFileSync(path.join(rootDir, filename), page);
+      console.log(`  Created ${filename} (${latestWeekly.weekIso})`);
     }
   }
 
@@ -241,24 +257,25 @@ function buildWeeklyPages(sign, signSlug, latestWeekly, weeklyArchives, weeklyFi
 
     const weekDisplay = getWeekDisplay(archive.key);
     const page = buildPageHtml(sign, signSlug, period, archive.key, weekDisplay, periodData, archive.data.generatedAt, template, weeklyFiles, 'archive');
-    fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}-${archive.key}.html`), page);
-    console.log(`  Created ${periodDir}/${signSlug}-${archive.key}.html`);
+    const filename = `${signSlug}${suffix}-${archive.key}.html`;
+    fs.writeFileSync(path.join(rootDir, filename), page);
+    console.log(`  Created ${filename}`);
   });
 }
 
 function buildMonthlyPages(sign, signSlug, latestMonthly, monthlyArchives, monthlyFiles, template) {
   const period = 'monthly';
-  const periodDir = PERIOD_DIRS.monthly;
-
-  ensureDir(path.join(__dirname, '..', periodDir));
+  const suffix = getPeriodSuffix(period);
+  const rootDir = path.join(__dirname, '..');
 
   if (latestMonthly) {
     const periodData = latestMonthly.monthly?.[sign.id];
     if (periodData) {
       const monthDisplay = getMonthDisplay(`${latestMonthly.year}-${String(latestMonthly.monthNum).padStart(2, '0')}`);
       const page = buildPageHtml(sign, signSlug, period, `${latestMonthly.year}-${String(latestMonthly.monthNum).padStart(2, '0')}`, monthDisplay, periodData, latestMonthly.generatedAt, template, monthlyFiles, null);
-      fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}.html`), page);
-      console.log(`  Created ${periodDir}/${signSlug}.html`);
+      const filename = `${signSlug}${suffix}.html`;
+      fs.writeFileSync(path.join(rootDir, filename), page);
+      console.log(`  Created ${filename}`);
     }
   }
 
@@ -268,8 +285,9 @@ function buildMonthlyPages(sign, signSlug, latestMonthly, monthlyArchives, month
 
     const monthDisplay = getMonthDisplay(archive.key);
     const page = buildPageHtml(sign, signSlug, period, archive.key, monthDisplay, periodData, archive.data.generatedAt, template, monthlyFiles, 'archive');
-    fs.writeFileSync(path.join(__dirname, '..', periodDir, `${signSlug}-${archive.key}.html`), page);
-    console.log(`  Created ${periodDir}/${signSlug}-${archive.key}.html`);
+    const filename = `${signSlug}${suffix}-${archive.key}.html`;
+    fs.writeFileSync(path.join(rootDir, filename), page);
+    console.log(`  Created ${filename}`);
   });
 }
 
@@ -282,14 +300,14 @@ function buildPages() {
   let template = fs.readFileSync(templatePath, 'utf8');
 
   console.log('Cleaning up old generated HTML files...');
-  
-  for (const period of ['gunluk', 'haftalik', 'aylik']) {
-    const periodDir = path.join(rootDir, period);
+
+  for (const periodDirName of PERIOD_DIR_NAMES) {
+    const periodDir = path.join(rootDir, periodDirName);
     if (fs.existsSync(periodDir)) {
       const files = fs.readdirSync(periodDir).filter(f => f.endsWith('.html'));
       files.forEach(f => {
         fs.unlinkSync(path.join(periodDir, f));
-        console.log(`  Deleted ${period}/${f}`);
+        console.log(`  Deleted ${periodDirName}/${f}`);
       });
     }
   }
@@ -393,9 +411,9 @@ function buildSignIndexPage(sign, latestDaily, latestWeekly, latestMonthly) {
         <h1>${sign.tr} Burcu</h1>
       </div>
       <div class="sign-links">
-        <a href="/gunluk/${signSlug}.html" class="period-btn">📅 Günlük Yorum ${dailyDate ? '(' + dailyDate + ')' : ''}</a>
-        <a href="/haftalik/${signSlug}.html" class="period-btn">📆 Haftalık Yorum ${weeklyDate ? '(' + weeklyDate + ')' : ''}</a>
-        <a href="/aylik/${signSlug}.html" class="period-btn">📆 Aylık Yorum ${monthlyDate ? '(' + monthlyDate + ')' : ''}</a>
+        <a href="/${signSlug}-gunluk.html" class="period-btn">📅 Günlük Yorum ${dailyDate ? '(' + dailyDate + ')' : ''}</a>
+        <a href="/${signSlug}-haftalik.html" class="period-btn">📆 Haftalık Yorum ${weeklyDate ? '(' + weeklyDate + ')' : ''}</a>
+        <a href="/${signSlug}-aylik.html" class="period-btn">📆 Aylık Yorum ${monthlyDate ? '(' + monthlyDate + ')' : ''}</a>
       </div>
       <section class="other-signs-mini">
         <h3>Diğer Burçlar</h3>
@@ -415,7 +433,7 @@ function buildSignIndexPage(sign, latestDaily, latestWeekly, latestMonthly) {
   </div>
   <script src="/i18n.js"></script>
   <script src="/tools.js"></script>
-  <script src="/app-init.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>`;
 }
@@ -423,27 +441,34 @@ function buildSignIndexPage(sign, latestDaily, latestWeekly, latestMonthly) {
 function buildSitemap() {
   const rootDir = __dirname + '/..';
   const pages = [];
-  
-  for (const period of ['gunluk', 'haftalik', 'aylik']) {
-    const periodDir = path.join(rootDir, period);
+
+  for (const periodName of PERIOD_DIR_NAMES) {
+    const periodDir = path.join(rootDir, periodName);
     if (fs.existsSync(periodDir)) {
       const files = fs.readdirSync(periodDir).filter(f => f.endsWith('.html'));
-      files.forEach(f => pages.push(`${period}/${f}`));
+      files.forEach(f => pages.push(`${periodName}/${f}`));
     }
   }
-  
-  const signPages = fs.readdirSync(rootDir).filter(f => f.endsWith('.html') && !f.includes('-') && f !== 'index.html');
+
+  const signPages = fs.readdirSync(rootDir).filter(f => f.endsWith('.html') && !f.includes('-') && f !== 'index.html' && f !== '404.html');
   signPages.forEach(f => pages.push(f));
+
+  const periodPages = fs.readdirSync(rootDir).filter(f => {
+    return f.endsWith('.html') && f.includes('-') &&
+           !f.includes('gunluk') && !f.includes('haftalik') && !f.includes('aylik') &&
+           f !== 'index.html' && f !== '404.html';
+  });
+  periodPages.forEach(f => pages.push(f));
 
   const urls = pages.map(page => {
     const url = page.replace('.html', '');
-    const isDaily = page.includes('gunluk');
-    const isWeekly = page.includes('haftalik');
-    const isMonthly = page.includes('aylik');
+    const isDaily = url.includes('-gunluk');
+    const isWeekly = url.includes('-haftalik');
+    const isMonthly = url.includes('-aylik');
     return `  <url>
     <loc>${SITE_URL}/${url}</loc>
-    <changefreq>${isDaily ? 'daily' : isWeekly ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${isDaily ? '0.9' : isWeekly ? '0.8' : '0.8'}</priority>
+    <changefreq>${isDaily ? 'daily' : isWeekly ? 'weekly' : isMonthly ? 'monthly' : 'weekly'}</changefreq>
+    <priority>${isDaily ? '0.9' : '0.8'}</priority>
   </url>`;
   });
 

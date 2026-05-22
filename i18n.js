@@ -7,8 +7,7 @@ const TRANSLATIONS = {
       weekly: "Haftalık",
       monthly: "Aylık",
       birthChart: "Doğum Haritası",
-      compatibility: "Uyumluluk",
-      premium: "Premium"
+      compatibility: "Uyumluluk"
     },
     hero: {
       subtitle: "AI destekli burç yorumları",
@@ -30,7 +29,8 @@ const TRANSLATIONS = {
     share: {
       title: "Paylaş",
       copy: "Kopyala",
-      copied: "Kopyalandı!"
+      copied: "Kopyalandı!",
+      shareOnX: "X'te Paylaş"
     },
     tools: {
       birthChart: "Doğum Haritası",
@@ -42,31 +42,32 @@ const TRANSLATIONS = {
     oracle: {
       placeholder: "Astrologa bir soru sor...",
       send: "Gönder",
-      limitReached: "Günlük 3 sorun bitti. Premium'a geç!",
+      limitReached: "Günlük 3 sorun bitti. Yarın tekrar dene!",
       remaining: "Kalan soru: {count}"
     },
-    premium: {
-      title: "Premium'a Geç",
-      subtitle: "Sınırsız yorum ve özel içerikler",
-      monthly: "Aylık",
-      yearly: "Yıllık",
-      lifetime: "Ömür Boyu",
-      features: [
-        "Sınırsız günlük/haftalık/aylık yorumlar",
-        "Sınırsız Oracle sorusu",
-        "Kişisel doğum haritası analizi",
-        "Reklamsız deneyim",
-        "Öncelikli içerik erişimi"
-      ]
-    },
     footer: {
-      tagline: "Bu site Claude AI destekliyle güçlendirilmiştir.",
+      tagline: "Bu site AI destekli burç yorumları sunar.",
       privacy: "Gizlilik Politikası",
       terms: "Kullanım Şartları"
     },
     loading: "Yıldızlar okunuyor...",
     error: "Evren şu an meşgul, tekrar dene",
-    retry: "Tekrar Dene"
+    retry: "Tekrar Dene",
+    alerts: {
+      selectSign: "Lütfen önce burcunu seç!",
+      fillAllFields: "Lütfen tüm alanları doldurun!",
+      nameRequired: "Ad Soyad gerekli",
+      emailRequired: "E-posta gerekli",
+      messageRequired: "Mesaj gerekli"
+    },
+    contact: {
+      title: "İletişim",
+      name: "Ad Soyad",
+      email: "E-posta",
+      message: "Mesaj",
+      submit: "Gönder",
+      sent: "Mesajınız alındı! En kısa sürede dönüş yapacağız. 🌙"
+    }
   },
   en: {
     siteName: "AstroOracle",
@@ -76,8 +77,7 @@ const TRANSLATIONS = {
       weekly: "Weekly",
       monthly: "Monthly",
       birthChart: "Birth Chart",
-      compatibility: "Compatibility",
-      premium: "Premium"
+      compatibility: "Compatibility"
     },
     hero: {
       subtitle: "AI-powered horoscope readings",
@@ -99,7 +99,8 @@ const TRANSLATIONS = {
     share: {
       title: "Share",
       copy: "Copy",
-      copied: "Copied!"
+      copied: "Copied!",
+      shareOnX: "Share on X"
     },
     tools: {
       birthChart: "Birth Chart",
@@ -111,31 +112,32 @@ const TRANSLATIONS = {
     oracle: {
       placeholder: "Ask the astrologer a question...",
       send: "Send",
-      limitReached: "Daily 3 questions reached. Go Premium!",
+      limitReached: "Daily 3 questions reached. Try again tomorrow!",
       remaining: "Questions remaining: {count}"
     },
-    premium: {
-      title: "Go Premium",
-      subtitle: "Unlimited readings and exclusive content",
-      monthly: "Monthly",
-      yearly: "Yearly",
-      lifetime: "Lifetime",
-      features: [
-        "Unlimited daily/weekly/monthly readings",
-        "Unlimited Oracle questions",
-        "Personal birth chart analysis",
-        "Ad-free experience",
-        "Priority content access"
-      ]
-    },
     footer: {
-      tagline: "This site is powered by Claude AI.",
+      tagline: "This site provides AI-powered horoscope readings.",
       privacy: "Privacy Policy",
       terms: "Terms of Service"
     },
     loading: "Reading the stars...",
     error: "The universe is busy, try again",
-    retry: "Try Again"
+    retry: "Try Again",
+    alerts: {
+      selectSign: "Please select your sign first!",
+      fillAllFields: "Please fill in all fields!",
+      nameRequired: "Name is required",
+      emailRequired: "Email is required",
+      messageRequired: "Message is required"
+    },
+    contact: {
+      title: "Contact",
+      name: "Name",
+      email: "Email",
+      message: "Message",
+      submit: "Send",
+      sent: "Your message has been received! We'll get back to you soon. 🌙"
+    }
   }
 };
 
@@ -242,6 +244,18 @@ function getCurrentLanguage() {
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
   document.documentElement.lang = lang;
+  clearHoroscopeCache();
+}
+
+function clearHoroscopeCache() {
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('horoscope_')) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
 }
 
 function getZodiacName(id, lang = null) {

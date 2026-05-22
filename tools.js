@@ -2,11 +2,11 @@ function calculateBirthChart(birthDate) {
   const date = new Date(birthDate);
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  
+
   const sunSign = getSunSign(month, day);
   const moonSign = getMoonSign(month, day);
   const risingSign = getRisingSign(month, day);
-  
+
   return {
     sun: sunSign,
     moon: moonSign,
@@ -14,28 +14,27 @@ function calculateBirthChart(birthDate) {
   };
 }
 
+const ZODIAC_WITH_DATES = [
+  { id: "aries", start: [3, 21], end: [4, 19] },
+  { id: "taurus", start: [4, 20], end: [5, 20] },
+  { id: "gemini", start: [5, 21], end: [6, 20] },
+  { id: "cancer", start: [6, 21], end: [7, 22] },
+  { id: "leo", start: [7, 23], end: [8, 22] },
+  { id: "virgo", start: [8, 23], end: [9, 22] },
+  { id: "libra", start: [9, 23], end: [10, 22] },
+  { id: "scorpio", start: [10, 23], end: [11, 21] },
+  { id: "sagittarius", start: [11, 22], end: [12, 21] },
+  { id: "capricorn", start: [12, 22], end: [1, 19] },
+  { id: "aquarius", start: [1, 20], end: [2, 18] },
+  { id: "pisces", start: [2, 19], end: [3, 20] }
+];
+
 function getSunSign(month, day) {
-  const signs = [
-    { id: "aries", start: [3, 21], end: [4, 19] },
-    { id: "taurus", start: [4, 20], end: [5, 20] },
-    { id: "gemini", start: [5, 21], end: [6, 20] },
-    { id: "cancer", start: [6, 21], end: [7, 22] },
-    { id: "leo", start: [7, 23], end: [8, 22] },
-    { id: "virgo", start: [8, 23], end: [9, 22] },
-    { id: "libra", start: [9, 23], end: [10, 22] },
-    { id: "scorpio", start: [10, 23], end: [11, 21] },
-    { id: "sagittarius", start: [11, 22], end: [12, 21] },
-    { id: "capricorn", start: [12, 22], end: [1, 19] },
-    { id: "aquarius", start: [1, 20], end: [2, 18] },
-    { id: "pisces", start: [2, 19], end: [3, 20] }
-  ];
-  
-  for (const sign of signs) {
+  for (const sign of ZODIAC_WITH_DATES) {
     if (month === sign.start[0] && day >= sign.start[1]) return sign.id;
     if (month === sign.end[0] && day <= sign.end[1]) return sign.id;
     if (month > sign.start[0] && month < sign.end[0]) return sign.id;
   }
-  
   return "capricorn";
 }
 

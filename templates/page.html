@@ -6,11 +6,13 @@
   <title>{{TITLE}}</title>
   <meta name="description" content="{{DESCRIPTION}}">
   <link rel="canonical" href="{{CANONICAL_URL}}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
   <meta property="og:title" content="{{OG_TITLE}}">
   <meta property="og:description" content="{{OG_DESCRIPTION}}">
   <meta property="og:type" content="article">
   <meta property="og:url" content="{{CANONICAL_URL}}">
   <meta property="og:site_name" content="KozmikRehber">
+  <meta property="og:image" content="{{SITE_URL}}/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{OG_TITLE}}">
   <meta name="twitter:description" content="{{OG_DESCRIPTION}}">
@@ -28,11 +30,7 @@
     },
     "publisher": {
       "@type": "Organization",
-      "name": "KozmikRehber",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{SITE_URL}}/logo.png"
-      }
+      "name": "KozmikRehber"
     }
   }
   </script>
@@ -109,7 +107,7 @@
       <section class="newsletter">
         <h2>Haftalık Burç Yorumu E-postana Gelsin</h2>
         <p>Her Pazartesi güncel burç yorumları için kaydol.</p>
-        <form class="newsletter-form" action="#" method="post">
+        <form class="newsletter-form" id="newsletter-form" action="#" method="post">
           <input type="email" name="email" placeholder="E-posta adresin" required>
           <select name="sign">
             <option value="">Burcunu seç</option>
@@ -117,6 +115,7 @@
           </select>
           <button type="submit">Kaydol</button>
         </form>
+        <p class="newsletter-status" id="newsletter-status"></p>
       </section>
     </main>
 
@@ -136,6 +135,17 @@
 
   <script src="/i18n.js"></script>
   <script src="/tools.js"></script>
-  <script src="/app-init.js"></script>
+  <script src="/app.js"></script>
+  <script>
+    document.getElementById('newsletter-form')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = document.getElementById('newsletter-status');
+      if (status) {
+        status.textContent = 'Bülten sistemi yakında aktif olacak. Şimdilik günlük siteyi takip etmeye devam et! 🌙';
+        status.style.color = '#d4af37';
+      }
+      this.reset();
+    });
+  </script>
 </body>
 </html>

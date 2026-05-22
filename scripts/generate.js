@@ -36,11 +36,14 @@ Yanıtını şu formatta ver:
 
 150-200 kelime yaz.`;
 
-async function callAPI(prompt, retryCount = 0) {
+const MODELS = ['qwen3.6-plus', 'qwen3.5-plus', 'deepseek-v4-flash'];
+const RETRY_CODES = [429, 500, 502, 503, 504];
+
+async function callAPI(prompt, modelIndex = 0, retryCount = 0) {
+  const model = MODELS[modelIndex];
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  console.log(`    [DEBUG] API Key: ${API_KEY ? 'SET (len=' + API_KEY.length + ', prefix=' + API_KEY.substring(0, 6) + '...)' : 'NOT SET'}`);
-  console.log(`    [DEBUG] Model: deepseek-v4-flash`);
+  console.log(`    [DEBUG] Model: ${model}`);
   console.log(`    [DEBUG] Attempt: ${retryCount + 1}/3`);
 
   if (retryCount > 0) {
@@ -50,7 +53,7 @@ async function callAPI(prompt, retryCount = 0) {
 
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      model: 'qwen3.6-plus',
+      model: model,
       messages: [{ role: 'user', content: `${SYSTEM_PROMPT}\n\n${prompt}` }],
       max_tokens: 800,
       temperature: 0.7
@@ -72,15 +75,16 @@ async function callAPI(prompt, retryCount = 0) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
-        const debugFile = '/tmp/api_response.json';
-        require('fs').writeFileSync(debugFile, JSON.stringify({statusCode: res.statusCode, body: body}, null, 2));
-
-        if (res.statusCode === 429) {
+        if (RETRY_CODES.includes(res.statusCode)) {
           if (retryCount < 3) {
-            console.log(`    Rate limited, retrying in ${Math.min(1000 * Math.pow(2, retryCount), 30000)}ms...`);
-            return callAPI(prompt, retryCount + 1).then(resolve).catch(reject);
+            console.log(`    ${res.statusCode} error, retrying in ${Math.min(1000 * Math.pow(2, retryCount), 30000)}ms...`);
+            return callAPI(prompt, modelIndex, retryCount + 1).then(resolve).catch(reject);
           }
-          reject(new Error(`API Error 429: Rate limit exceeded after 3 retries`));
+          if (modelIndex < MODELS.length - 1) {
+            console.log(`    Model ${model} failed after retries, trying next model...`);
+            return callAPI(prompt, modelIndex + 1, 0).then(resolve).catch(reject);
+          }
+          reject(new Error(`API Error ${res.statusCode}: Rate limit exceeded after 3 retries for all models`));
           return;
         }
         if (res.statusCode !== 200) {
@@ -91,8 +95,8 @@ async function callAPI(prompt, retryCount = 0) {
           const parsed = JSON.parse(body);
           const content = parsed.choices?.[0]?.message?.content || parsed.content || parsed.output || parsed.choices?.[0]?.text;
 
-
           const isValidContent = (text) => {
+            if (!text) return false;
             const t = text.toLowerCase();
             const bad = ["bu bir talep", "analiz edelim", "verilen talimatlari", "kullanıcının söyledikleri", "rol tanımı", "rolü üstleniyorum", "ifadesi bir rol", "ifadesi bir rol"];
             return !bad.some(p => t.includes(p));
@@ -301,7 +305,7 @@ async function generateMonthly() {
 
 async function main() {
   console.log(`[START] Starting horoscope generation... Type: ${GENERATE_TYPE}`);
-  console.log(`[START] API_KEY status: ${API_KEY ? `SET (len=${API_KEY.length})` : 'NOT SET'}`);
+  console.log(`[START] API_KEY status: ${API_KEY ? 'SET' : 'NOT SET'}`);
 
   if (!API_KEY) {
     console.error('[ERROR] OPENCODE_API_KEY environment variable is not set');

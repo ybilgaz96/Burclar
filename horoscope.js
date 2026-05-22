@@ -6,28 +6,48 @@ const CACHE_DURATION = {
   compatibility: 24 * 60 * 60 * 1000
 };
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_BASE = 1000;
+
 const SYSTEM_PROMPT = `Sen AstroOracle platformunun mistik astroloji asistanısın. Türkçe veya İngilizce yaz (kullanıcının diline göre). Mistik, sıcak, umut verici ama gerçekçi bir dil kullan. Asla kesin tahminler yapma, rehberlik sun. Her yorumda pratik bir tavsiye ekle. Yanıtları format: önce enerji özeti, sonra kategoriler, son tavsiye. Emojileri ölçülü kullan (paragraf başına 1).`;
 
-async function callAI(prompt, type = "horoscope") {
-  const model = "qwen3.5-plus";
-  
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, model, type })
-  });
-  
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.error || `API call failed: ${response.status}`);
+async function callAI(prompt, type = "horoscope", retries = 0) {
+  const model = "qwen3.6-plus";
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, model, type })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMessage = data.error || `API call failed: ${response.status}`;
+
+      if ((response.status === 429 || response.status >= 500) && retries < MAX_RETRIES) {
+        const delay = Math.min(RETRY_DELAY_BASE * Math.pow(2, retries), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return callAI(prompt, type, retries + 1);
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    if (!data.content) {
+      throw new Error("No content in API response");
+    }
+
+    return data.content;
+  } catch (error) {
+    if (retries < MAX_RETRIES && (error.message.includes("429") || error.message.includes("500") || error.message.includes("fetch"))) {
+      const delay = Math.min(RETRY_DELAY_BASE * Math.pow(2, retries), 30000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return callAI(prompt, type, retries + 1);
+    }
+    throw error;
   }
-  
-  if (!data.content) {
-    throw new Error("No content in API response");
-  }
-  
-  return data.content;
 }
 
 function getCacheKey(sign, period, lang) {
@@ -211,7 +231,7 @@ function getLuckyInfo(luckyInfo) {
   };
 }
 
-function getOraclesQuestionsToday() {
+function getOracleQuestionsToday() {
   const today = new Date().toDateString();
   const stored = localStorage.getItem("oracle_tracking");
   
@@ -226,13 +246,13 @@ function getOraclesQuestionsToday() {
 }
 
 function incrementOracleCount() {
-  const current = getOraclesQuestionsToday();
+  const current = getOracleQuestionsToday();
   current.count++;
   localStorage.setItem("oracle_tracking", JSON.stringify(current));
 }
 
 function canAskOracle() {
-  const { count } = getOraclesQuestionsToday();
+  const { count } = getOracleQuestionsToday();
   return count < 3;
 }
 
