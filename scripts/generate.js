@@ -32,7 +32,10 @@ Yanıtını şu formatta ver:
 **Sağlık:** [2-3 cümle]
 **Genel Enerji:** [2-3 cümle]
 **Pratik Tavsiye:** [1 cümle]
-**Şanslı Sayı:** X | **Şanslı Renk:** X | **Şanslı Gün:** X
+---
+Şanslı Sayı: [Rakam]
+Şanslı Renk: [Renk]
+Şanslı Gün: [Gün]
 
 150-200 kelime yaz.`;
 
@@ -133,26 +136,54 @@ function getDailyPrompt(sign, date) {
 }
 
 function getWeeklyPrompt(sign, weekStart, weekEnd) {
-  return `${sign.tr} burcu için ${weekStart} - ${weekEnd} haftasına ait haftalık astroloji yorumu yaz. Haftanın genel teması, önemli gezegen geçişleri ve pratik tavsiyeler içersin. 300-400 kelime.`;
+  return `${sign.tr} burcu için ${weekStart} - ${weekEnd} haftasına ait haftalık astroloji yorumu yaz. Haftanın genel teması, önemli gezegen geçişleri ve pratik tavsiyeler içersin. Aşk, kariyer, sağlık ve genel enerji konularını ayrı paragraflar halinde yaz.
+---
+Şanslı Sayı: [Rakam]
+Şanslı Renk: [Renk]
+Şanslı Gün: [Gün]
+
+300-400 kelime yaz.`;
 }
 
 function getMonthlyPrompt(sign, month, year) {
   const monthName = new Date(year, month).toLocaleDateString('tr-TR', { month: 'long' });
-  return `${sign.tr} burcu için ${monthName} ${year} ayına ait aylık astroloji yorumu yaz. Ay boyunca önemli astrolojik olayları, temaları ve tavsiyeleri içersin. 400-500 kelime.`;
+  return `${sign.tr} burcu için ${monthName} ${year} ayına ait aylık astroloji yorumu yaz. Ay boyunca önemli astrolojik olayları, temaları ve tavsiyeleri içersin. Aşk, kariyer, sağlık ve genel enerji konularını ayrı paragraflar halinde yaz.
+---
+Şanslı Sayı: [Rakam]
+Şanslı Renk: [Renk]
+Şanslı Gün: [Gün]
+
+400-500 kelime yaz.`;
 }
 
 function getLuckyInfo(text) {
-  const numberMatch = text.match(/\d+/);
-  const colors = ['kırmızı', 'mavi', 'yeşil', 'mor', 'altın', 'pembe', 'turuncu', 'lacivert'];
-  const colorMatch = colors.find(c => text.toLowerCase().includes(c)) || 'mor';
+  const separator = '---';
+  let luckyText = text;
+
+  if (text.includes(separator)) {
+    const parts = text.split(separator);
+    luckyText = parts[parts.length - 1].trim();
+  }
+
+  const numberMatch = luckyText.match(/Şanslı Sayı:\s*(\d+)/i) || luckyText.match(/şanslı sayı:\s*(\d+)/i);
+  const colors = ['kırmızı', 'mavi', 'yeşil', 'mor', 'altın', 'pembe', 'turuncu', 'lacivert', 'bordo', 'siyah', 'beyaz', 'sarı'];
+  const colorMatch = colors.find(c => luckyText.toLowerCase().includes(c)) || 'mor';
   const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-  const dayMatch = days.find(d => text.toLowerCase().includes(d.toLowerCase())) || 'Cuma';
+  const dayMatch = days.find(d => luckyText.toLowerCase().includes(d.toLowerCase())) || 'Cuma';
 
   return {
-    number: numberMatch ? parseInt(numberMatch[0]) : Math.floor(Math.random() * 99) + 1,
+    number: numberMatch ? parseInt(numberMatch[1]) : Math.floor(Math.random() * 99) + 1,
     color: colorMatch.charAt(0).toUpperCase() + colorMatch.slice(1),
     day: dayMatch
   };
+}
+
+function extractCleanContent(text) {
+  const separator = '---';
+  if (text.includes(separator)) {
+    return text.split(separator)[0].trim();
+  }
+  return text;
 }
 
 function getWeekRange(date) {
@@ -195,12 +226,13 @@ async function generateDaily() {
 
   for (const sign of ZODIAC_SIGNS) {
     console.log(`  Processing ${sign.tr}...`);
-    const content = await callAPI(getDailyPrompt(sign, today));
+    const rawContent = await callAPI(getDailyPrompt(sign, today));
+    const cleanContent = extractCleanContent(rawContent);
     data.daily[sign.id] = {
       name: sign.tr,
       symbol: sign.symbol,
-      content: content,
-      lucky: getLuckyInfo(content)
+      content: cleanContent,
+      lucky: getLuckyInfo(rawContent)
     };
     if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
       await sleep(3000);
@@ -236,12 +268,13 @@ async function generateWeekly() {
 
   for (const sign of ZODIAC_SIGNS) {
     console.log(`  Processing ${sign.tr}...`);
-    const content = await callAPI(getWeeklyPrompt(sign, weekRange.start, weekRange.end));
+    const rawContent = await callAPI(getWeeklyPrompt(sign, weekRange.start, weekRange.end));
+    const cleanContent = extractCleanContent(rawContent);
     data.weekly[sign.id] = {
       name: sign.tr,
       symbol: sign.symbol,
-      content: content,
-      lucky: getLuckyInfo(content)
+      content: cleanContent,
+      lucky: getLuckyInfo(rawContent)
     };
     if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
       await sleep(3000);
@@ -280,12 +313,13 @@ async function generateMonthly() {
 
   for (const sign of ZODIAC_SIGNS) {
     console.log(`  Processing ${sign.tr}...`);
-    const content = await callAPI(getMonthlyPrompt(sign, month, year));
+    const rawContent = await callAPI(getMonthlyPrompt(sign, month, year));
+    const cleanContent = extractCleanContent(rawContent);
     data.monthly[sign.id] = {
       name: sign.tr,
       symbol: sign.symbol,
-      content: content,
-      lucky: getLuckyInfo(content)
+      content: cleanContent,
+      lucky: getLuckyInfo(rawContent)
     };
     if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
       await sleep(3000);
